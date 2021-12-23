@@ -2,7 +2,7 @@ package com.test.scrap.api;
 
 
 import com.google.gson.JsonParser;
-import com.test.scrap.utils.Apiutils;
+import com.test.scrap.utils.ApiUtils;
 import com.test.scrap.utils.RequestConstants;
 import com.test.scrap.utils.HttpRequest;
 import com.test.scrap.utils.WebscraperConstants;
@@ -33,10 +33,10 @@ public class Webscraper {
             // sends the scrap request to webscraper
             sendScrapRequest(urlToScrap, urlNameToScrap);
 
-            return Apiutils.handleApiSuccessResponse();
+            return ApiUtils.handleApiSuccessResponse();
         } catch (Exception e) {
             logger.info("An error occurred", e);
-            return Apiutils.handleApiExceptionResponse(e);
+            return ApiUtils.handleApiExceptionResponse(e);
         }
     }
 

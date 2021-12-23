@@ -3,7 +3,7 @@ package com.test.scrap.utils;
 import com.test.scrap.model.ScrapingResponse;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
-public class Apiutils {
+public class ApiUtils {
 
     public static String handleApiExceptionResponse(Exception e) {
         return new ScrapingResponse(false, e.getMessage()).toJson();
