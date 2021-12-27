@@ -1,10 +1,13 @@
 package com.test.scrap.api;
 
 
+import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParser;
-import com.test.scrap.utils.ApiUtils;
-import com.test.scrap.utils.RequestConstants;
-import com.test.scrap.utils.HttpRequest;
+import com.test.scrap.utils.*;
 import com.test.scrap.utils.WebscraperConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -12,10 +15,32 @@ import org.apache.logging.log4j.Logger;
 
 import java.net.URL;
 import java.util.*;
+import java.util.stream.Collectors;
 
-public class Webscraper {
+public class Webscraper implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
     private final static Logger logger = LogManager.getLogger();
     private String webscraperToken = "";
+
+    @Override
+    public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent apiGatewayProxyRequestEvent, Context context) {
+        context.getLogger().log("Event received: " + apiGatewayProxyRequestEvent.getBody());
+
+        try{
+            // gets the body info
+            Map<String, String> requestMap = new GsonBuilder().setPrettyPrinting().create().fromJson(apiGatewayProxyRequestEvent.getBody(), Map.class);
+
+            String urlToScrap = requestMap.containsKey(WebscraperConstants.REQUEST_URL) ? requestMap.get(WebscraperConstants.REQUEST_URL) : null;
+            String urlName = requestMap.containsKey(WebscraperConstants.REQUEST_URL_NAME) ? requestMap.get(WebscraperConstants.REQUEST_URL) : urlToScrap;
+            String selector = requestMap.containsKey(WebscraperConstants.REQUEST_SELECTOR) ? requestMap.get(WebscraperConstants.REQUEST_SELECTOR) : null;
+            String webscraperToken = requestMap.containsKey(WebscraperConstants.REQUEST_TOKEN) ? requestMap.get(WebscraperConstants.REQUEST_TOKEN) : null;
+
+            start(urlToScrap, urlName, selector, webscraperToken);
+        } catch (Exception e) {
+            return ApiUtils.defineAPIGatewayErrorResponse(e);
+        }
+
+        return ApiUtils.defineAPIGatewaySuccessResponse(apiGatewayProxyRequestEvent.getBody());
+    }
 
     /**
      * Starts the scraping process in webscraper
@@ -25,19 +50,12 @@ public class Webscraper {
      * @param webscraperToken
      * @return
      */
-    public String start(String urlToScrap, String urlNameToScrap, String webscraperToken) {
-        try {
-            // saves the webscraper token
-            this.webscraperToken = webscraperToken;
+    public void start(String urlToScrap, String urlNameToScrap, String webscraperToken, String selector) {
+        // saves the webscraper token
+        this.webscraperToken = webscraperToken;
 
-            // sends the scrap request to webscraper
-            sendScrapRequest(urlToScrap, urlNameToScrap);
-
-            return ApiUtils.handleApiSuccessResponse();
-        } catch (Exception e) {
-            logger.info("An error occurred", e);
-            return ApiUtils.handleApiExceptionResponse(e);
-        }
+        // sends the scrap request to webscraper
+        sendScrapRequest(urlToScrap, urlNameToScrap, selector);
     }
 
     /**
@@ -46,9 +64,9 @@ public class Webscraper {
      * @param urlToScrap
      * @param urlNameToScrap
      */
-    private void sendScrapRequest(String urlToScrap, String urlNameToScrap) {
+    private void sendScrapRequest(String urlToScrap, String urlNameToScrap, String selector) {
         // creates a sitemap in scraper
-        Integer sitemapId = createSitemap(urlToScrap, urlNameToScrap);
+        Integer sitemapId = createSitemap(urlToScrap, urlNameToScrap, selector);
 
         // creates a scraping job using the new sitemap id
         createScrapingJob(sitemapId);
@@ -61,30 +79,25 @@ public class Webscraper {
      * @param urlNameToScrap
      * @return
      */
-    private Integer createSitemap(String urlToScrap, String urlNameToScrap) {
+    private Integer createSitemap(String urlToScrap, String urlNameToScrap, String selector) {
         try {
-            // instantiates the URL class to get the elements (like protocol) separately from the URL to scrap
-            URL url = new URL(urlToScrap);
-
             // generates a unique id for the sitemap
             // it is needed to allow concurrent scrap requests for the same site
             String sitemapUniqueId = urlNameToScrap.trim().replace(" ", "_") + "-" + System.currentTimeMillis();
 
-            // tries to retrieve the sitemaps' location from the robots.txt file
-            List<String> sitemapList = retrieveSitemapsFromRobotsFile(urlToScrap);
-
-            // if the sitemaps information is not present in robots.txt
-            if (sitemapList.isEmpty()) {
-                for (String sitemapDefaultFile : retrieveDefaultSitemapFilesLocation()) {
-                    // tries to get the sitemap files in the default sitemap.xml paths
-                    sitemapList.add(url.getProtocol() + "://" + url.getHost() + "/" + sitemapDefaultFile);
-                }
-            }
+            // tries to retrieve the sitemaps' location from the robots.txt file or the default paths
+            Set<String> sitemaps = retrieveSitemaps(urlToScrap);
 
             // defines the selectors to scrap the sites
             List selectorsList = new ArrayList<>();
-            selectorsList.add(retrieveSelectorSitemapXmlLink(sitemapList));
-            selectorsList.add(retrieveSubtitleSelectorText());
+
+            // if at least one sitemap was found
+            if (!sitemaps.isEmpty()) {
+                // adds the Selector Sitemap Xml Link
+                selectorsList.add(retrieveSelectorSitemapXmlLink(sitemaps));
+            }
+            // adds the custom Selector Text
+            selectorsList.add(retrieveCustomSelectorText(selector, !sitemaps.isEmpty()));
 
             // fills the http request to create a sitemap in webscraper
             HttpRequest httpRequest = new HttpRequest();
@@ -93,13 +106,32 @@ public class Webscraper {
             httpRequest.getRequestJSON().put("selectors", selectorsList);
 
             // sends the request to create a sitemap in webscraper
-            String response = httpRequest.sendRequestWithResponse(WebscraperConstants.CREATE_SITEMAP_URL + this.webscraperToken, null, RequestConstants.METHOD.POST);
+            String response = httpRequest.sendRequestWithResponse(WebscraperConstants.CREATE_SITEMAP_URL + this.webscraperToken, null, ApiConstants.METHOD.POST);
 
             // returns the generated sitemap id
             return JsonParser.parseString(response).getAsJsonObject().get("data").getAsJsonObject().get("id").getAsInt();
         } catch (Exception e) {
             throw new RuntimeException("An error occurred in the creation of a sitemap in webscraper | " + e.getMessage(), e);
         }
+    }
+
+    private Set<String> retrieveSitemaps(String urlToScrap) {
+        Set<String> sitemaps = new HashSet<>();
+
+        try {
+            // first tries to get the sitemap.xml info from the robots.txt file
+            sitemaps.addAll(retrieveSitemapsFromRobotsFile(urlToScrap));
+
+            // if the sitemap info is not present in robots.txt file
+            if (sitemaps.isEmpty()) {
+                // tries to search the sitemap.xml in the default paths
+                sitemaps.addAll(retrieveSitemapsFromDefautPaths(urlToScrap));
+            }
+        } catch (Exception e) {
+            logger.info("An exception has occurred", e);
+        }
+
+        return sitemaps;
     }
 
     /**
@@ -118,7 +150,7 @@ public class Webscraper {
             httpRequest.getRequestJSON().put("proxy", 0);
 
             // sends the request to create a scraping job in webscraper
-            String response = httpRequest.sendRequestWithResponse(WebscraperConstants.CREATE_SCRAPING_JOB_URL + webscraperToken, null, RequestConstants.METHOD.POST);
+            String response = httpRequest.sendRequestWithResponse(WebscraperConstants.CREATE_SCRAPING_JOB_URL + webscraperToken, null, ApiConstants.METHOD.POST);
 
             // if it failed
             if (!JsonParser.parseString(response).getAsJsonObject().get("success").getAsBoolean()) {
@@ -137,21 +169,21 @@ public class Webscraper {
      * @param urlToScrap
      * @return
      */
-    private List<String> retrieveSitemapsFromRobotsFile(String urlToScrap) {
-        List<String> sitemapList = new ArrayList<>();
+    private Set<String> retrieveSitemapsFromRobotsFile(String urlToScrap) {
+        Set<String> sitemaps = new HashSet<>();
         try {
             // instantiates the URL class to get the elements (like protocol) separately from the URL to scrap
-            URL urlAux = new URL(urlToScrap);
+            URL url = new URL(urlToScrap);
 
             // sends the request to get the robots.txt file
-            String response = new HttpRequest().sendRequestWithResponse(urlAux.getProtocol() + "://" + urlAux.getHost() + "/robots.txt", null, RequestConstants.METHOD.GET);
+            String response = new HttpRequest().sendRequestWithResponse(url.getProtocol() + "://" + url.getHost() + "/robots.txt", null, ApiConstants.METHOD.GET);
 
             if (StringUtils.isNotEmpty(response)) {
                 // splits the response by 'line break'
                 for (String element : response.split("\\r?\\n")) {
                     if (element.contains("Sitemap:")) {
                         // adds the sitemap url
-                        sitemapList.add(StringUtils.deleteWhitespace(element.replace("Sitemap:", "")));
+                        sitemaps.add(StringUtils.deleteWhitespace(element.replace("Sitemap:", "")));
                     }
                 }
             }
@@ -159,8 +191,29 @@ public class Webscraper {
             throw new RuntimeException("An error occurred in the sitemap info retrieval in robots file | " + e.getMessage(), e);
         }
 
-        return sitemapList;
+        return sitemaps;
     }
+
+    /**
+     * Retrieves the sitemaps from default sitemap.xml paths
+     *
+     * @param urlToScrap
+     * @return
+     */
+    private Set<String> retrieveSitemapsFromDefautPaths(String urlToScrap) {
+        Set<String> sitemaps = new HashSet<>();
+        try {
+            // instantiates the URL class to get the elements (like protocol) separately from the URL to scrap
+            URL url = new URL(urlToScrap);
+
+            sitemaps.addAll(retrieveDefaultSitemapFilesLocation(urlToScrap).stream().filter(defaultSitemapPath -> new HttpRequest().pathExists(defaultSitemapPath, null, ApiConstants.METHOD.GET)).collect(Collectors.toList()));
+        } catch (Exception e) {
+            throw new RuntimeException("An error occurred in the sitemap info retrieval in default paths | " + e.getMessage(), e);
+        }
+
+        return sitemaps;
+    }
+
 
     /**
      * Retrieves the selector 'SitemapXmlLink' to be used in the sitemap creation
@@ -169,12 +222,12 @@ public class Webscraper {
      * @param sitemaps
      * @return
      */
-    private Map<String, Object> retrieveSelectorSitemapXmlLink(List<String> sitemaps) {
+    private Map<String, Object> retrieveSelectorSitemapXmlLink(Set<String> sitemaps) {
         Map selectorSitemap = new HashMap<>();
 
-        selectorSitemap.put("id", RequestConstants.SITEMAP_SELECTOR_ID);
-        selectorSitemap.put("type", RequestConstants.SITEMAP_XML_LINK_SELECTOR_TYPE);
-        selectorSitemap.put("parentSelectors", Arrays.asList(RequestConstants.ROOT_SELECTOR_ID));
+        selectorSitemap.put("id", WebscraperConstants.SITEMAP_SELECTOR_ID);
+        selectorSitemap.put("type", WebscraperConstants.SITEMAP_XML_LINK_SELECTOR_TYPE);
+        selectorSitemap.put("parentSelectors", Arrays.asList(WebscraperConstants.ROOT_SELECTOR_ID));
         selectorSitemap.put("sitemapXmlMinimumPriority", 0.1);
         selectorSitemap.put("sitemapXmlUrlRegex", "");
         selectorSitemap.put("sitemapXmlUrls", sitemaps);
@@ -184,17 +237,17 @@ public class Webscraper {
 
     /**
      * Retrieves the selector 'SelectorText' to be used in the sitemap creation
-     * This selector uses the subtitle element (h2) in the pages
+     * This selector uses the subtitle element (h2) in the pages by default
      *
      * @return
      */
-    private Map<String, Object> retrieveSubtitleSelectorText() {
+    private Map<String, Object> retrieveCustomSelectorText(String selector, boolean usesSitemapXml) {
         Map selectorText = new HashMap<>();
 
-        selectorText.put("id", RequestConstants.SUBTITLE_SELECTOR_ID);
-        selectorText.put("type", RequestConstants.TEXT_SELECTOR_TYPE);
-        selectorText.put("parentSelectors", Arrays.asList(RequestConstants.SITEMAP_SELECTOR_ID));
-        selectorText.put("selector", "h2");
+        selectorText.put("id", WebscraperConstants.CUSTOM_SELECTOR_ID);
+        selectorText.put("type", WebscraperConstants.TEXT_SELECTOR_TYPE);
+        selectorText.put("parentSelectors", usesSitemapXml ? Arrays.asList(WebscraperConstants.SITEMAP_SELECTOR_ID) : Arrays.asList(WebscraperConstants.ROOT_SELECTOR_ID));
+        selectorText.put("selector", StringUtils.isNotEmpty(selector) ? selector : "h2");
         selectorText.put("multiple", true);
         selectorText.put("regex", "");
         selectorText.put("delay", 0);
@@ -207,18 +260,35 @@ public class Webscraper {
      *
      * @return
      */
-    public List<String> retrieveDefaultSitemapFilesLocation() {
-        return Arrays.asList(
-                "sitemap.xml",
-                "sitemap.xml.gz",
-                "sitemap_index.xml",
-                "sitemap-index.xml",
-                "sitemap_index.xml.gz",
-                "sitemap-index.xml.gz",
-                ".sitemap.xml",
-                ".sitemap",
-                "admin/config/search/xmlsitemap",
-                "sitemap/sitemap-index.xml"
-        );
+    public List<String> retrieveDefaultSitemapFilesLocation(String urlToScrap) {
+        List<String> defaultSitemapFilesLocation = new ArrayList<>();
+
+        try {
+            // instantiates the URL class to get the elements (like protocol) separately from the URL to scrap
+            URL url = new URL(urlToScrap);
+
+            return Arrays.asList(
+                    url.getProtocol() + "://" + url.getHost() + "/" + "sitemap.xml",
+                    url.getProtocol() + "://" + url.getHost() + "/" + "sitemap.xml.gz",
+                    url.getProtocol() + "://" + url.getHost() + "/" + "sitemap_index.xml",
+                    url.getProtocol() + "://" + url.getHost() + "/" + "sitemap-index.xml",
+                    url.getProtocol() + "://" + url.getHost() + "/" + "sitemap_index.xml.gz",
+                    url.getProtocol() + "://" + url.getHost() + "/" + "sitemap-index.xml.gz",
+                    url.getProtocol() + "://" + url.getHost() + "/" + ".sitemap.xml",
+                    url.getProtocol() + "://" + url.getHost() + "/" + ".sitemap",
+                    url.getProtocol() + "://" + url.getHost() + "/" + "admin/config/search/xmlsitemap",
+                    url.getProtocol() + "://" + url.getHost() + "/" + "sitemap/sitemap-index.xml"
+            );
+        } catch (Exception e) {
+            logger.info("An exception occurred", e);
+            return null;
+        }
+
     }
+
+    public static void main(String[] args) {
+        new Webscraper().start("https://www.xvcuritiba.com.br", "XV Curitiba", "", null);
+    }
+
+
 }

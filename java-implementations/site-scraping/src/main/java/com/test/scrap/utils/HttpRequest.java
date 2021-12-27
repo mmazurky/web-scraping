@@ -32,9 +32,9 @@ public class HttpRequest {
     private CloseableHttpResponse response = null;
     private CloseableHttpClient client = null;
 
-    private HttpRequestBase fillHttpJsonRequest(String url, Map<String, String> headerMap, RequestConstants.METHOD method) {
+    private HttpRequestBase fillHttpJsonRequest(String url, Map<String, String> headerMap, ApiConstants.METHOD method) {
         try {
-            boolean isPostMethod = method.equals(RequestConstants.METHOD.POST);
+            boolean isPostMethod = method.equals(ApiConstants.METHOD.POST);
 
             HttpRequestBase httpRequestBase = isPostMethod ? new HttpPost(url) : new HttpGet(url);
             httpRequestBase.setHeader("Content-Type", "application/json");
@@ -58,7 +58,7 @@ public class HttpRequest {
         }
     }
 
-    public boolean sendRequest(String url, Map<String, String> headerMap, RequestConstants.METHOD method) {
+    public boolean sendRequest(String url, Map<String, String> headerMap, ApiConstants.METHOD method) {
         try {
             HttpRequestBase httpRequestBase = fillHttpJsonRequest(url, headerMap, method);
 
@@ -106,7 +106,7 @@ public class HttpRequest {
         return requestSentWithSuccess(response);
     }
 
-    public String sendRequestWithResponse(String url, Map<String, String> headerMap, RequestConstants.METHOD method) {
+    public String sendRequestWithResponse(String url, Map<String, String> headerMap, ApiConstants.METHOD method) {
         String responseString = "";
         try {
             HttpRequestBase httpRequestBase = fillHttpJsonRequest(url, headerMap, method);
@@ -162,6 +162,55 @@ public class HttpRequest {
 
     private boolean requestSentWithSuccess(CloseableHttpResponse response) {
         return response.getStatusLine() != null && response.getStatusLine().getStatusCode() == 200;
+    }
+
+    public boolean pathExists(String url, Map<String, String> headerMap, ApiConstants.METHOD method) {
+        try {
+            HttpRequestBase httpRequestBase = fillHttpJsonRequest(url, headerMap, method);
+
+            SSLContextBuilder builder = new SSLContextBuilder();
+            builder.loadTrustMaterial(null, new TrustSelfSignedStrategy());
+            SSLConnectionSocketFactory sslConnectionSocketFactory = new SSLConnectionSocketFactory(builder.build(), NoopHostnameVerifier.INSTANCE);
+            Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory>create()
+                    .register("http", new PlainConnectionSocketFactory())
+                    .register("https", sslConnectionSocketFactory)
+                    .build();
+
+            PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager(registry);
+            cm.setMaxTotal(100);
+            client = HttpClients.custom()
+                    .setSSLSocketFactory(sslConnectionSocketFactory)
+                    .setConnectionManager(cm)
+                    .build();
+
+            if (response != null) {
+                response.close();
+            }
+            response = client.execute(httpRequestBase);
+            String responseStatusCode = response.getStatusLine() != null ? String.valueOf(response.getStatusLine().getStatusCode()) : "";
+
+            return response.getStatusLine() != null && response.getStatusLine().getStatusCode() == 200;
+        } catch (Exception e) {
+            log.info("An exception occurred", e);
+        } finally {
+            if (client != null) {
+                try {
+                    client.close();
+                } catch (Exception e) {
+                    log.info("An exception occurred");
+                }
+            }
+
+            if (response != null) {
+                try {
+                    response.close();
+                } catch (Exception e) {
+                    log.info("An exception occurred");
+                }
+            }
+        }
+
+        return false;
     }
 
     public JSONObject getRequestJSON() {
