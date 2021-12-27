@@ -285,10 +285,4 @@ public class Webscraper implements RequestHandler<APIGatewayProxyRequestEvent, A
         }
 
     }
-
-    public static void main(String[] args) {
-        new Webscraper().start("https://www.xvcuritiba.com.br", "XV Curitiba", "", null);
-    }
-
-
 }
