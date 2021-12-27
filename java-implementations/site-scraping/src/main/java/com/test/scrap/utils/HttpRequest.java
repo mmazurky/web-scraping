@@ -27,7 +27,7 @@ import java.util.Map;
 
 public class HttpRequest {
 
-    private static final Logger log = LogManager.getLogger();
+    private static final Logger log = LogManager.getLogger(HttpRequest.class.getName());
     private JSONObject requestJSON = new JSONObject();
     private CloseableHttpResponse response = null;
     private CloseableHttpClient client = null;

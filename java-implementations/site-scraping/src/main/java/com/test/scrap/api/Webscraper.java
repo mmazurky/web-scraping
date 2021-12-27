@@ -18,24 +18,26 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class Webscraper implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
-    private final static Logger logger = LogManager.getLogger();
+    private static final Logger logger = LogManager.getLogger(Webscraper.class.getName());
     private String webscraperToken = "";
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent apiGatewayProxyRequestEvent, Context context) {
-        context.getLogger().log("Event received: " + apiGatewayProxyRequestEvent.getBody());
 
         try{
+            context.getLogger().log("Event received: " + apiGatewayProxyRequestEvent.getBody());
             // gets the body info
             Map<String, String> requestMap = new GsonBuilder().setPrettyPrinting().create().fromJson(apiGatewayProxyRequestEvent.getBody(), Map.class);
-
+            logger.info("body: " + apiGatewayProxyRequestEvent.getBody());
             String urlToScrap = requestMap.containsKey(WebscraperConstants.REQUEST_URL) ? requestMap.get(WebscraperConstants.REQUEST_URL) : null;
-            String urlName = requestMap.containsKey(WebscraperConstants.REQUEST_URL_NAME) ? requestMap.get(WebscraperConstants.REQUEST_URL) : urlToScrap;
+            String urlName = requestMap.containsKey(WebscraperConstants.REQUEST_URL_NAME) ? requestMap.get(WebscraperConstants.REQUEST_URL_NAME) : urlToScrap;
             String selector = requestMap.containsKey(WebscraperConstants.REQUEST_SELECTOR) ? requestMap.get(WebscraperConstants.REQUEST_SELECTOR) : null;
             String webscraperToken = requestMap.containsKey(WebscraperConstants.REQUEST_TOKEN) ? requestMap.get(WebscraperConstants.REQUEST_TOKEN) : null;
 
+
             start(urlToScrap, urlName, selector, webscraperToken);
         } catch (Exception e) {
+            logger.info("An exception has occurred", e);
             return ApiUtils.defineAPIGatewayErrorResponse(e);
         }
 
@@ -111,6 +113,7 @@ public class Webscraper implements RequestHandler<APIGatewayProxyRequestEvent, A
             // returns the generated sitemap id
             return JsonParser.parseString(response).getAsJsonObject().get("data").getAsJsonObject().get("id").getAsInt();
         } catch (Exception e) {
+            logger.info("An exception has occurred", e);
             throw new RuntimeException("An error occurred in the creation of a sitemap in webscraper | " + e.getMessage(), e);
         }
     }
@@ -158,6 +161,7 @@ public class Webscraper implements RequestHandler<APIGatewayProxyRequestEvent, A
             }
 
         } catch (Exception e) {
+            logger.info("An exception has occurred", e);
             throw new RuntimeException("An error occurred in the creation of a scraping job in webscraper | " + e.getMessage(), e);
         }
     }
@@ -188,6 +192,7 @@ public class Webscraper implements RequestHandler<APIGatewayProxyRequestEvent, A
                 }
             }
         } catch (Exception e) {
+            logger.info("An exception has occurred", e);
             throw new RuntimeException("An error occurred in the sitemap info retrieval in robots file | " + e.getMessage(), e);
         }
 
@@ -208,6 +213,7 @@ public class Webscraper implements RequestHandler<APIGatewayProxyRequestEvent, A
 
             sitemaps.addAll(retrieveDefaultSitemapFilesLocation(urlToScrap).stream().filter(defaultSitemapPath -> new HttpRequest().pathExists(defaultSitemapPath, null, ApiConstants.METHOD.GET)).collect(Collectors.toList()));
         } catch (Exception e) {
+            logger.info("An exception has occurred", e);
             throw new RuntimeException("An error occurred in the sitemap info retrieval in default paths | " + e.getMessage(), e);
         }
 
@@ -283,6 +289,5 @@ public class Webscraper implements RequestHandler<APIGatewayProxyRequestEvent, A
             logger.info("An exception occurred", e);
             return null;
         }
-
     }
 }
