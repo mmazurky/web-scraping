@@ -1,0 +1,12 @@
+{
+  "name": "save-scraping-result-to-db",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "author": "Marcelo Mazurky",
+  "license": "ISC",
+  "dependencies": {
+    "knex": "^0.95.15",
+    "mysql2": "^2.3.3"
+  }
+}
