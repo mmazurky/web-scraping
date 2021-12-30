@@ -16,6 +16,7 @@ exports.handler = function(event, context) {
         })
     } catch (e) {
         console.log("An exception has occurred: " + e);
+        context.fail(e);
     }
 }
 
