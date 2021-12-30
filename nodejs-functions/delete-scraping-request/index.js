@@ -13,13 +13,13 @@ exports.handler = function(event, context, callback) {
             // returns the request status
             executeCallback(null, callback);
         }).catch(error => {
-            console.log("An exception has occurred: " + error.message ? error.message : error);
+            console.log("An exception has occurred: " + error);
             // returns the request status
             executeCallback(error, callback);
         });
     }
     catch (error) {
-        console.log("An error occurred: " + error);
+        console.log("An exception has occurred: " + error);
         // returns the request status
         executeCallback(error, callback);
     }
@@ -38,17 +38,6 @@ function deleteScrapingRequest(event) {
             }).catch(function(e) {reject(e);});
         }).catch(function(e) {reject(e);});
     });
-}
-
-
-function executeCallback(error, callback) {
-    let response = {
-        status: !error ? 200 : 400,
-        success: !error
-    };
-
-    // executes the callback
-    callback(error.message, JSON.stringify(response));
 }
 
 function callDeleteAPI(pathConfig) {
@@ -71,12 +60,12 @@ function callDeleteAPI(pathConfig) {
                 if (result.success) {
                     resolve(chunk);
                 } else {
-                    console.log("Error in delete operation", chunk);
+                    console.log("Got error in " + pathConfig, chunk);
                     reject(chunk);
                 }
             });
             res.on('error', function(e) {
-                console.log("Got error in " + pathConfig, e.message);
+                console.log("Got error in " + pathConfig, e);
                 reject(e);
             });
         });
@@ -84,4 +73,15 @@ function callDeleteAPI(pathConfig) {
         // delete the data
         delete_req.end();
     });
+}
+
+
+function executeCallback(error, callback) {
+    let response = {
+        status: !error ? 200 : 400,
+        success: !error
+    };
+
+    // executes the callback
+    callback(null, JSON.stringify(response));
 }
