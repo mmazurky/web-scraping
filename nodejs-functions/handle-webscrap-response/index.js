@@ -11,22 +11,23 @@ exports.handler = function(event, context) {
             console.log("Finished with success!");
             context.succeed();
         }).catch(e => {
-            console.log("An exception has occurred: " + e.message ? e.message : e);
+            console.log("An exception has occurred: " + e);
             context.fail(e);
         })
     } catch (e) {
-        console.log("An exception has occurred: " + e.message ? e.message : e);
+        console.log("An exception has occurred: " + e);
     }
 }
 
 function handleWebscrapResponse(event) {
     return new Promise((resolve, reject) => {
-        // retrieves the scraping job id received in the response
-        let scrapingJobId = retrieveScrapingConfigValue(event, "scrapingjob_id");
-        // retrieves the sitemap id received in the response
-        let sitemapId = retrieveScrapingConfigValue(event, "sitemap_id");
         
         try {
+            // retrieves the scraping job id received in the response
+            let scrapingJobId = retrieveScrapingConfigValue(event, "scrapingjob_id");
+            // retrieves the sitemap id received in the response
+            let sitemapId = retrieveScrapingConfigValue(event, "sitemap_id");
+
             // retrieves the scraping result
             return retrieveScrapingResult(scrapingJobId).then(scrapingResult => {
                 // saves the scraping result to DB
@@ -59,10 +60,10 @@ function retrieveScrapingConfigValue(event, configName) {
 }
 
 function retrieveScrapingResult(scrapingJobId) {
-    // mounts the URL to get the scraping result
-    let scrapingFileURL = "https://api.webscraper.io/api/v1/scraping-job/" + scrapingJobId + "/json?api_token=" + webscraperToken;
-
     return new Promise((resolve, reject) => {
+        // mounts the URL to get the scraping result
+        let scrapingFileURL = "https://api.webscraper.io/api/v1/scraping-job/" + scrapingJobId + "/json?api_token=" + webscraperToken;
+
         https.get(scrapingFileURL, (response) => {
             const buffers = [];
             response.on('error', (err) => { reject(err); });
@@ -88,15 +89,16 @@ function callLambdaFunction(functionName, payload) {
 
 
         lambda.invoke(params, function(err, data) {
-            let jsonResponse = JSON.parse(data.Payload);
-            let success = JSON.parse(jsonResponse).success;
+            let hasPayload = data && data.Payload;
+            let jsonPayload = hasPayload ? JSON.parse(data.Payload) : null;
+            
+            let success = hasPayload ? JSON.parse(jsonPayload).success : false;
 
             if (!success || err) {
                 console.log("Error calling the Lambda Function " + functionName + ": ", data ? data : err);
                 reject("Function:" + functionName);
             } else {
                 resolve(data);
-
             }
         });
     });
