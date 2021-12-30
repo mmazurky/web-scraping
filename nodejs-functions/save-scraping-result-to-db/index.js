@@ -4,17 +4,6 @@ const dbHost = process.env.DB_HOST;
 const dbUser = process.env.DB_USER;
 const dbPassword = process.env.DB_PASSWORD;
 
-// starts the db library 
-const knex = require('knex')({
-    client: 'mysql2',
-    connection: {
-        database: dbName,
-        host: dbHost,
-        user: dbUser,
-        password: dbPassword
-    }
-});
-
 exports.handler = function(event, context, callback) {
     console.log('Received event:', event);
 
@@ -23,6 +12,8 @@ exports.handler = function(event, context, callback) {
         saveToDB(event);
         // returns the request status
         executeCallback(null, callback);
+        
+        console.log("Finished with success!");
     } catch (error) {
         console.log("An error occurred: " + error);
         // returns the request status
@@ -36,6 +27,17 @@ function saveToDB(scrapingData) {
         { scraping_data: scrapingData }
     ]
 
+    // starts the db library 
+    const knex = require('knex')({
+        client: 'mysql2',
+        connection: {
+            database: dbName,
+            host: dbHost,
+            user: dbUser,
+            password: dbPassword
+        }
+    });
+    
     // inserts the result in tb_scraping table
     knex('tb_scraping').insert(scrapingResult).then(() => console.log("data inserted"))
         .catch((err) => { console.log(err); throw err })
