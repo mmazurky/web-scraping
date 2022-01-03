@@ -27,17 +27,16 @@ const createScrapingJob = function(sitemapId, webscraperToken) {
             var post_req = https.request(post_options, function(res) {
                 res.setEncoding('utf8');
                 res.on('data', function(chunk) {
-                    console.log('Response: ' + chunk);
                     var resObj = JSON.parse(chunk);
 
-                    if (resObj.success) {
-                        resolve(true);
+                    if (resObj.data && resObj.data.id) {
+                        resolve(resObj.data.id);
                     } else {
-                        reject("Failure in scraping job creation");
+                        reject(chunk);
                     }
                 });
                 res.on('error', function(e) {
-                    reject("Failure in scraping job creation");
+                    reject(e);
                 });
 
             });

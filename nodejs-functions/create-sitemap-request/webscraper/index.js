@@ -1,13 +1,15 @@
 const https = require('https');
 const http = require('http');
 
-const createSitemapRequest = function(url, name, selector, webscraperToken) {
+const createSitemapRequest = function(url, selector, webscraperToken) {
     return new Promise((resolve, reject) => {
         try {
-            getSitemaps(url, name).then(sitemapArray => {
-                createSiteMap(url, name, sitemapArray, selector, webscraperToken).then(sitemapId => {
+            getSitemaps(url).then(sitemapArray => {
+                createSiteMap(url, sitemapArray, selector, webscraperToken).then(sitemapId => {
                     resolve(sitemapId);
-                }).catch(e => reject(e));
+                }).catch(e => {
+                    reject(e);
+                });
             }).catch(e => reject(e));
         } catch (error) {
             reject(error);
@@ -15,21 +17,20 @@ const createSitemapRequest = function(url, name, selector, webscraperToken) {
     });
 }
 
-function getSitemaps(url, name) {
+function getSitemaps(url) {
     return new Promise((resolve, reject) => {
         try {
             // tries to get the sitemaps files from the robots.txt file
-            retrieveSitemapsFromRobot(url, name).then(sitemapArray => {
+            retrieveSitemapsFromRobot(url).then(sitemapArray => {
                 // if the sitemap files exists in it, uses them, otherwise uses the default sitemap.xml paths
-                if (sitemapArray && sitemapArray > 0) {
+                if (sitemapArray && sitemapArray.length > 0) {
                     resolve(sitemapArray);
-                }
-                else {
+                } else {
                     retrieveSitemapsFromDefaultPaths(url).then(sitemapArray => {
                         resolve(sitemapArray);
                     }).catch(e => reject(e));
                 }
-            });
+            }).catch(e => reject(e));
         }
         catch (error) {
             reject(error);
@@ -38,20 +39,28 @@ function getSitemaps(url, name) {
 
 }
 
-function createSiteMap(url, name, sitemapArray, selector, webscraperToken) {
+function createSiteMap(url, sitemapArray, selector, webscraperToken) {
     return new Promise((resolve, reject) => {
         try {
             let selectors = [];
 
             // generates a uniqueid
-            var uniqueid = name.trim().replace(" ", "_");
+            let urlAux = new URL(url);
+            let uniqueid = urlAux.host + "-" + new Date().getTime();
 
+            console.log("> Adding selectors to the request")
             if (sitemapArray && sitemapArray.length > 0) {
+                console.log("-Sitemap files were found - adding sitemap selector");
                 selectors.push(retrieveSelectorSitemapXmlLink(sitemapArray));
+            } else {
+                console.log("-No sitemap files were found - only the request page will be scraped");
             }
+            console.log("-Adding custom text selector with the " + (selector ? selector : "h2") + " element to the request");
             selectors.push(retrieveCustomSelectorText(selector, sitemapArray));
 
-            var body = JSON.stringify({
+            console.log("-Selectors added: " + JSON.stringify(selectors));
+
+            let body = JSON.stringify({
                 "_id": uniqueid,
                 "startUrl": [
                     url
@@ -60,10 +69,9 @@ function createSiteMap(url, name, sitemapArray, selector, webscraperToken) {
                     selectors
                 ]
             });
-            console.log("body: " + JSON.stringify(body));
 
             // An object of options to indicate where to post to
-            var post_options = {
+            let post_options = {
                 host: "api.webscraper.io",
                 path: "/api/v1/sitemap?api_token=" + webscraperToken,
                 method: 'POST',
@@ -74,16 +82,15 @@ function createSiteMap(url, name, sitemapArray, selector, webscraperToken) {
             };
 
             // Set up the request
-            var post_req = https.request(post_options, function(res) {
+            let post_req = https.request(post_options, function(res) {
                 res.setEncoding('utf8');
                 res.on('data', function(chunk) {
-                    var resObj = JSON.parse(chunk);
+                    let resObj = JSON.parse(chunk);
 
                     if (resObj.data && resObj.data.id) {
                         resolve(resObj.data.id);
-                    }
-                    else {
-                        reject("Failure in sitemap creation: " + chunk);
+                    } else {
+                        reject(chunk);
                     }
                 });
                 res.on('error', function(e) {
@@ -101,12 +108,13 @@ function createSiteMap(url, name, sitemapArray, selector, webscraperToken) {
     });
 }
 
-function retrieveSitemapsFromRobot(url, name) {
+function retrieveSitemapsFromRobot(url) {
     return new Promise((resolve, reject) => {
         try {
-            var urlAux = new URL(url);
-            var sitemapArray = [];
-            var get_options = {
+            console.log("> Searching for sitemaps in robots.txt");
+            let urlAux = new URL(url);
+            let sitemapArray = [];
+            let get_options = {
                 host: urlAux.host,
                 path: "/robots.txt",
                 method: 'GET',
@@ -117,23 +125,21 @@ function retrieveSitemapsFromRobot(url, name) {
 
             // Set up the request
             const protocol = urlAux.protocol.startsWith('https') ? https : http;
-            var get_req = protocol.request(get_options, function(res) {
+            let get_req = protocol.request(get_options, function(res) {
                 res.setEncoding('utf8');
                 res.on('data', function(chunk) {
-                    console.log('Response: ' + chunk);
-                    var splitted = chunk.split(/\r?\n/);
-                    for (var i = 0; i < splitted.length; i++) {
+                    let splitted = chunk.split(/\r?\n/);
+                    for (let i = 0; i < splitted.length; i++) {
                         if (splitted[i].includes("Sitemap:")) {
                             sitemapArray.push(splitted[i].replace("Sitemap:", "").replace(/\s/g, ""));
                         }
                     }
-
-                    console.log(sitemapArray);
                 });
                 res.on('error', function(e) {
                     reject(e);
                 });
                 res.on('end', function(chunk) {
+                    console.log(sitemapArray.length > 0 ? "-Sitemaps found in robot.xml: " + sitemapArray : "-Sitemaps not found in robots.txt");
                     resolve(sitemapArray);
                 });
             });
@@ -177,13 +183,15 @@ function retrieveCustomSelectorText(selector, sitemapArray) {
 function retrieveSitemapsFromDefaultPaths(urlToScrap) {
     return new Promise((resolve, reject) => {
         let sitemapArray = [];
-        var promises = retrieveDefaultSitemapFilesLocation(urlToScrap).map(url => pathExists(url).then(response => {
+        let promises = retrieveDefaultSitemapFilesLocation(urlToScrap).map(url => pathExists(url).then(response => {
             let jsonResponse = JSON.parse(response);
             if (jsonResponse.exists) {
                 sitemapArray.push(jsonResponse.url);
             }
         }));
         Promise.all(promises).then(results => {
+            console.log("> Searching for sitemaps in the default paths");
+            console.log(sitemapArray.length > 0 ? "-Sitemaps found in default paths: " + sitemapArray : "-Sitemaps not found in default paths");
             resolve(sitemapArray);
         });
     });
@@ -193,7 +201,7 @@ function retrieveDefaultSitemapFilesLocation(urlToScrap) {
     let defaultSitemapFilesLocation = [];
 
     try {
-        var url = new URL(urlToScrap);
+        let url = new URL(urlToScrap);
 
         defaultSitemapFilesLocation = [
             url.protocol + "//" + url.host + "/" + "sitemap.xml",
