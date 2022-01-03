@@ -1,0 +1,11 @@
+{
+  "name": "create-scraping-job-request",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "author": "Marcelo Mazurky",
+  "license": "ISC",
+  "dependencies": {
+    "https": "^1.0.0"
+  }
+}
