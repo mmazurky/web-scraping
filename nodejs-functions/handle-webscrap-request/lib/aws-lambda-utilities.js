@@ -1,3 +1,8 @@
+const AWS = require('aws-sdk');
+const lambda = new AWS.Lambda();
+const https = require('https');
+const http = require('http');
+
 const executeCallback = function(error, callback) {
     let response = {
         status: !error ? 200 : 400,

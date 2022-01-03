@@ -1,8 +1,5 @@
-const AWS = require('aws-sdk');
-const lambda = new AWS.Lambda();
+
 const awsLambdaUtilities = require('../lib/aws-lambda-utilities');
-const https = require('https');
-const http = require('http');
 
 const handler = function(event, context) {
     try {
