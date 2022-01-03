@@ -1,4 +1,4 @@
-// possible dbClients = pg, sqlite3, mysql, mysql2, oracledb, tedious - default is mysql2
+// possible dbClients = pg, mysql2, oracledb - default is mysql2
 const saveToDB = function(scrapingData, dbHost, dbUser, dbPassword, dbName, dbClient) {
     return new Promise((resolve, reject) => {
         try {
