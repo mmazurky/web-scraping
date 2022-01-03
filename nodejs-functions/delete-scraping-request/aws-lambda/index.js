@@ -7,9 +7,9 @@ const handler = function(event, context, callback) {
     try {
         // webscraper's token (configured as environment variable)
         let webscraperToken = process.env.WEBSCRAPER_TOKEN;
-
-        // creates the scraping request
-        webscraper.createScrapingJob(event.sitemapId, webscraperToken).then(() => {
+        
+        // deletes the scraping request
+        deleteScrapingRequest(event.scrapingJobId, event.sitemapId, webscraperToken).then(() => {
             console.log("Finished with success!");
             // returns the request status
             awsLambdaUtilities.executeCallback(null, callback);

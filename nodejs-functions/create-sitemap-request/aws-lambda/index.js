@@ -5,8 +5,11 @@ const handler = function(event, context, callback) {
     console.log('Received event:', event);
 
     try {
+        // webscraper's token (configured as environment variable)
+        let webscraperToken = process.env.WEBSCRAPER_TOKEN;
+
         // deletes the scraping request
-        webscraper.createSitemapRequest(event.url, event.name, event.selector, process.env.WEBSCRAPER_TOKEN).then(sitemapId => {
+        webscraper.createSitemapRequest(event.url, event.name, event.selector, webscraperToken).then(sitemapId => {
             console.log("Finished with success!");
             // returns the request status
             awsLambdaUtilities.executeCallback(null, callback, sitemapId);
