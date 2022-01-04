@@ -46,7 +46,7 @@ function createSiteMap(url, sitemapArray, selector, webscraperToken) {
 
             // generates a uniqueid
             let urlAux = new URL(url);
-            let uniqueid = urlAux.host + "-" + new Date().getTime();
+            let uniqueid = urlAux.hostname.replace(/\W/g, '-') + "-" + new Date().getTime();
 
             console.log("> Adding selectors to the request")
             if (sitemapArray && sitemapArray.length > 0) {
@@ -65,10 +65,10 @@ function createSiteMap(url, sitemapArray, selector, webscraperToken) {
                 "startUrl": [
                     url
                 ],
-                "selectors": [
-                    selectors
-                ]
+                "selectors": selectors
             });
+
+            console.log(body);
 
             // An object of options to indicate where to post to
             let post_options = {
