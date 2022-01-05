@@ -1,6 +1,7 @@
 //initializes the libraries
 const main = require("./index");
 const ngrok = require('ngrok');
+const bodyParser = require('body-parser');
 const express = require('express');
 const app = express();
 const propertiesUtilities = require("./lib/properties-utilities");
