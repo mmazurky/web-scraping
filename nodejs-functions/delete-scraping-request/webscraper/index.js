@@ -1,8 +1,18 @@
+//initializes the libraries
 const https = require('https');
 
+/**
+ * Deletes the scraping request from webscraper
+ * @param {number} scrapingJobId 
+ * @param {number} sitemapId 
+ * @param {string} webscraperToken 
+ * @returns 
+ */
 const deleteScraping = function (scrapingJobId, sitemapId, webscraperToken) {
     return new Promise((resolve, reject) => {
+        //default scraping job delete's path
         let scrapingJobDeletePath = "/api/v1/scraping-job/" + scrapingJobId + "?api_token=" + webscraperToken;
+        //default sitemap delete's path
         let sitemapDeletePath = "/api/v1/sitemap/" + sitemapId + "?api_token=" + webscraperToken;
 
         // deletes the scraping job
@@ -19,7 +29,13 @@ const deleteScraping = function (scrapingJobId, sitemapId, webscraperToken) {
     });
 };
 
+/**
+ * Calls the webscraper's DELETE API
+ * @param {string} pathConfig 
+ * @returns 
+ */
 function callDeleteAPI(pathConfig) {
+    //sets up the request
     var delete_options = {
         host: "api.webscraper.io",
         path: pathConfig,
