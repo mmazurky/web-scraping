@@ -55,37 +55,38 @@ app.post("/config", (req, res) => {
         let ngtokenUpdated = propertiesUtilities.getProperty("ngrok", "token") != req.body.ngrokToken;
 
         //saves all the config values to its properties files
-        propertiesUtilities.setProperty("webscraper", "token", req.body.webscraperToken).then(() => {
-            propertiesUtilities.setProperty("database", "name", req.body.dbName).then(() => {
-                propertiesUtilities.setProperty("database", "host", req.body.dbHost).then(() => {
-                    propertiesUtilities.setProperty("database", "client", req.body.dbClient).then(() => {
-                        propertiesUtilities.setProperty("database", "username", req.body.dbUser).then(() => {
-                            propertiesUtilities.setProperty("database", "password", req.body.dbPassword).then(() => {
-                                propertiesUtilities.setProperty("ngrok", "token", req.body.ngrokToken).then(() => {
-                                    //if the ng's token was updated, reconnects to it
-                                    if (ngtokenUpdated) {
-                                        connectToNgrok(req.body.ngrokToken).then(() => {}).catch(e => {
-                                            console.log("Error: " + e);
-                                            console.log("> Failed to connect to ngrok! Access http://localhost:" + serverPort + "/config" + " to set the config info");
-                                        });
-                                    }
-                                    //response
-                                    res.send({
-                                        "success": "true"
-                                    });
-                                })
-                            })
-                        })
-                    })
-                })
-            })
-        }).catch(e => {
-            //response
-            res.send({
-                "success": "false",
-                "reason": error
+        let saveConfigToProperties = async () => {
+            try {
+                await propertiesUtilities.setProperty("webscraper", "token", req.body.webscraperToken);
+                await propertiesUtilities.setProperty("database", "name", req.body.dbName);
+                await propertiesUtilities.setProperty("database", "host", req.body.dbHost);
+                await propertiesUtilities.setProperty("database", "client", req.body.dbClient);
+                await propertiesUtilities.setProperty("database", "username", req.body.dbUser);
+                await propertiesUtilities.setProperty("database", "password", req.body.dbPassword);
+                await propertiesUtilities.setProperty("ngrok", "token", req.body.ngrokToken);
+                
+                //response
+                res.send({
+                    "success": "true"
+                });
+
+            } catch (error) {
+                //response
+                res.send({
+                    "success": "false",
+                    "reason": error
+                });
+            }
+        };
+        saveConfigToProperties();
+
+        //if the ng's token was updated, reconnects to it
+        if (ngtokenUpdated) {
+            connectToNgrok(req.body.ngrokToken).then(() => {}).catch(e => {
+                console.log("Error: " + e);
+                console.log("> Failed to connect to ngrok! Access http://localhost:" + serverPort + "/config" + " to set the config info");
             });
-        });
+        }
     } else {
         res.send({
             //response
@@ -194,7 +195,7 @@ function generateConfigHtml() {
 
     //gets the generated db client' select html
     let dbClientHtml = generateDbClientSelectHtml(dbClient);
-    
+
     return `
         <!DOCTYPE html>
         <html>
