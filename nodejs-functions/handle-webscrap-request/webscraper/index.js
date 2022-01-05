@@ -1,6 +1,14 @@
+//initializes the libraries
 const createSitemapRequest = require('create-sitemap-request');
 const createScrapingJobRequest = require('create-scraping-job-request');
 
+/**
+ * Handles the Scrap request
+ * @param {string} url 
+ * @param {string} selector 
+ * @param {string} webscraperToken 
+ * @returns 
+ */
 const handleWebscrapRequest = function (url, selector, webscraperToken) {
     return new Promise((resolve, reject) => {
         try {
