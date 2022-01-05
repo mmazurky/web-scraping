@@ -1,4 +1,11 @@
+const awsLambda = require('./aws-lambda/index');
+const webscraper = require('./webscraper/index');
+
 module.exports = {
-    webscraper: require('./webscraper/index'),
-    awsLambda: require('./aws-lambda/index')
+    awsLambdaHandler: function(event, context) {
+        return awsLambda.handler(event, context);
+    },
+    createSitemap: function(url, selector, webscraperToken) {
+        return webscraper.createSitemap(url, selector, webscraperToken);
+    }
 };

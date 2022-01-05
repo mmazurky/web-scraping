@@ -1,6 +1,6 @@
 const https = require('https');
 
-const deleteScrapingRequest = function(scrapingJobId, sitemapId, webscraperToken) {
+const deleteScraping = function(scrapingJobId, sitemapId, webscraperToken) {
     return new Promise((resolve, reject) => {
         let scrapingJobDeletePath = "/api/v1/scraping-job/" + scrapingJobId + "?api_token=" + webscraperToken;
         let sitemapDeletePath = "/api/v1/sitemap/" + sitemapId + "?api_token=" + webscraperToken;
@@ -51,5 +51,5 @@ function callDeleteAPI(pathConfig) {
 }
 
 module.exports = {
-    deleteScrapingRequest
+    deleteScraping
 }

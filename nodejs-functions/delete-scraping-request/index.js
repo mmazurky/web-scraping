@@ -1,4 +1,11 @@
+const awsLambda = require('./aws-lambda/index');
+const webscraper = require('./webscraper/index');
+
 module.exports = {
-    webscraper: require('./webscraper/index'),
-    awsLambda: require('./aws-lambda/index')
+    awsLambdaHandler: function(event, context) {
+        return awsLambda.handler(event, context);
+    },
+    deleteScraping: function(scrapingJobId, sitemapId, webscraperToken) {
+        return webscraper.deleteScraping(scrapingJobId, sitemapId, webscraperToken);
+    }
 };

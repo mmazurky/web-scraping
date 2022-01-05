@@ -1,5 +1,5 @@
-const createSitemapRequestLib = require('create-sitemap-request');
-const createScrapingJobRequestLib = require('create-scraping-job-request');
+const createSitemapRequest = require('create-sitemap-request');
+const createScrapingJobRequest = require('create-scraping-job-request');
 
 const handleWebscrapRequest = function(url, selector, webscraperToken) {
     return new Promise((resolve, reject) => {
@@ -7,10 +7,10 @@ const handleWebscrapRequest = function(url, selector, webscraperToken) {
             console.log("----------------- STARTING SCRAPING REQUEST -----------------");
             console.log("Request | URL: " + url + " / Selector: " + selector + " / Token: " + webscraperToken);
             console.log("----------------- CREATING SITEMAP -----------------");
-            createSitemapRequestLib.webscraper.createSitemapRequest(url, selector, webscraperToken).then(sitemapId => {
+            createSitemapRequest.createSitemap(url, selector, webscraperToken).then(sitemapId => {
                 console.log("-Sitemap created with success! id: " + sitemapId);
                 console.log("----------------- CREATING SCRAPING JOB -----------------");
-                createScrapingJobRequestLib.webscraper.createScrapingJob(sitemapId, webscraperToken).then(scrapingJobId => {
+                createScrapingJobRequest.createScrapingJob(sitemapId, webscraperToken).then(scrapingJobId => {
                     console.log("-Scraping Job created with success! id: " + scrapingJobId);
                     console.log("----------------- SCRAPING REQUEST FINISHED WITH SUCCESS! -----------------");
                     resolve(scrapingJobId);

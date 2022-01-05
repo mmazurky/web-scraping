@@ -1,7 +1,7 @@
 const https = require('https');
 const http = require('http');
 
-const createSitemapRequest = function(url, selector, webscraperToken) {
+const createSitemap = function(url, selector, webscraperToken) {
     return new Promise((resolve, reject) => {
         try {
             getSitemaps(url).then(sitemapArray => {
@@ -239,5 +239,5 @@ function pathExists(path) {
 }
 
 module.exports = {
-    createSitemapRequest
+    createSitemap
 }

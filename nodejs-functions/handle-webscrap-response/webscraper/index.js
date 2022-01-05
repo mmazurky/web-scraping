@@ -42,11 +42,11 @@ const handleWebscrapResponse = function(event) {
 
                 // saves the scraping result to DB
                 console.log("----------------- SAVING RESULT TO THE DATABASE -----------------");
-                saveScrapingResultToDb.database.saveToDB(scrapingResult, dbHost, dbUser, dbPassword, dbName, dbClient).then(() => {
+                saveScrapingResultToDb.saveToDB(scrapingResult, dbHost, dbUser, dbPassword, dbName, dbClient).then(() => {
                     console.log("-Inserted in DB with success!");
                     // deletes the scraping request
                     console.log("----------------- DELETING THE SCRAP REQUEST FROM WEBSCRAPER -----------------");
-                    deleteScrapingRequest.webscraper.deleteScrapingRequest(scrapingJobId, sitemapId, webscraperToken).then(() => {
+                    deleteScrapingRequest.deleteScraping(scrapingJobId, sitemapId, webscraperToken).then(() => {
                         console.log("-Scrap Request deleted with success!")
                         resolve(true);
                     }).catch(e => { reject(e); });
