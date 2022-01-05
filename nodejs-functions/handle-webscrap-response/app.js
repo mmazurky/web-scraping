@@ -14,18 +14,16 @@ app.use(bodyParser.urlencoded({ // to support URL-encoded bodies
 
 app.post("/", (req, res) => {
     console.log("> Webscraper finished the scrap! " + JSON.stringify(req.body));
-    res.write('OK');
-    res.end();
+    res.send({
+        "success": "true"
+    });
+
     main.handleWebscrapResponse(req.body).then(() => {
         console.log("----------------- SCRAPING PROCESS FINISHED WITH SUCCESS -----------------");
     }).catch(e => {
         console.log("-An error has occurred: " + e);
     });
 });
-
-app.get("/", (req, res) => {
-    res.send("");
-})
 
 app.get("/config", (req, res) => {
     let webscraperToken = propertiesUtilities.getProperty("webscraper", "token");
@@ -80,22 +78,32 @@ app.post("/config", (req, res) => {
                         propertiesUtilities.setProperty("database", "username", req.body.dbUser).then(() => {
                             propertiesUtilities.setProperty("database", "password", req.body.dbPassword).then(() => {
                                 propertiesUtilities.setProperty("ngrok", "token", req.body.ngrokToken).then(() => {
-                                    res.send("Config saved with success!");
                                     if (ngtokenUpdated) {
                                         connectToNgrok(req.body.ngrokToken).then(() => {}).catch(e => {
                                             console.log("Error: " + e);
                                             console.log("> Failed to connect to ngrok! Access http://localhost:" + serverPort + "/config" + " to set the config info");
                                         });
                                     }
+                                    res.send({
+                                        "success": "true"
+                                    });
                                 })
                             })
                         })
                     })
                 })
             })
-        }).catch(e => res.send("Error saving the config: " + error));
+        }).catch(e => {
+            res.send({
+                "success": "false",
+                "reason": error
+            });
+        });
     } else {
-        res.send(validateConfigResult + " cannot be empty")
+        res.send({
+            "success": "false",
+            "reason": validateConfigResult + " cannot be empty"
+        });
     }
 
 });

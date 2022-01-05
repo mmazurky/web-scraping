@@ -38,9 +38,17 @@ app.get("/scrap", (req, res) => {
 app.post("/scrap", (req, res) => {
   let webscraperToken = propertiesUtilities.getProperty("webscraper", "token");
 
-  main.sendScrapingRequest(req.body.url, req.body.selector, webscraperToken).then(scrapingJobId => res.send("Scraping Request finished with success! Scraping Job Id: " + scrapingJobId)).catch(e => {
+  main.sendScrapingRequest(req.body.url, req.body.selector, webscraperToken).then(scrapingJobId => {
+    res.send({
+      "success": "true",
+      "scraping_job_id": scrapingJobId
+    });
+  }).catch(e => {
     console.log("An error has occurred: " + e);
-    res.send("An error has occurred: " + e);
+    res.send({
+      "success": "false",
+      "reason": e
+    });
   });
 
   propertiesUtilities.setProperty("webscraper", "selector", req.body.selector).then(() => {}).catch(e => {});
@@ -70,10 +78,20 @@ app.post("/config", (req, res) => {
 
   if (configIsValid) {
     propertiesUtilities.setProperty("webscraper", "token", req.body.webscraperToken).then(() => {
-      res.send("Config saved with success!");
-    }).catch(e => res.send("Error saving the config: " + error));
+      res.send({
+        "success": "true"
+      });
+    }).catch(e => {
+      res.send({
+        "success": "false",
+        "reason": error
+      });
+    });
   } else {
-    res.send(validateConfigResult + " cannot be empty")
+    res.send({
+      "success": "false",
+      "reason": validateConfigResult + " cannot be empty"
+    });
   }
 
 });
