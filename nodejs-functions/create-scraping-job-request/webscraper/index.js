@@ -1,4 +1,5 @@
 const https = require('https');
+const webscraperUtilities = require('../lib/webscraper-utilities.js');
 
 const createScrapingJob = function(sitemapId, webscraperToken) {
     return new Promise((resolve, reject) => {

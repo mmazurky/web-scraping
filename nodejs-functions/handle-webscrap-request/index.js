@@ -1,7 +1,10 @@
-const webscraper = require('./webscraper/index')
+const webscraper = require('./webscraper/index');
+const awsLambda = require('./aws-lambda/index');
 
 module.exports = {
-    awsLambda: require('./aws-lambda/index'),
+    awsLambdaHandler: function(event, context) {
+        return awsLambda.handler(event, context);
+    },
     sendScrapingRequest: function(url, selector, webscraperToken) {
         return webscraper.handleWebscrapRequest(url, selector, webscraperToken);
     }

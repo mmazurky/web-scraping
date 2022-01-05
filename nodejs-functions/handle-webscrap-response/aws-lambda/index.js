@@ -21,11 +21,11 @@ function handleWebscrapResponse(event) {
     return new Promise((resolve, reject) => {
         try {
             // retrieves the scraping job id received in the response
-            let scrapingJobId = webscraperUtilities.retrieveScrapingConfigValue(event, "scrapingjob_id");
+            let scrapingJobId = awsLambdaUtilities.retrieveScrapingConfigValue(event, "scrapingjob_id");
             // retrieves the sitemap id received in the response
-            let sitemapId = webscraperUtilities.retrieveScrapingConfigValue(event, "sitemap_id");
+            let sitemapId = awsLambdaUtilities.retrieveScrapingConfigValue(event, "sitemap_id");
             // retrieves the webscraper token received in the response
-            let webscraperToken = webscraperUtilities.retrieveScrapingConfigValue(event, "webscraper_token");
+            let webscraperToken = awsLambdaUtilities.retrieveScrapingConfigValue(event, "webscraper_token");
 
             // retrieves the scraping result
             return webscraper.retrieveScrapingResult(scrapingJobId,webscraperToken).then(scrapingResult => {

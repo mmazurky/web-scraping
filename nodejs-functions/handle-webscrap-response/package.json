@@ -6,8 +6,17 @@
   "author": "Marcelo Mazurky",
   "license": "ISC",
   "dependencies": {
+    "-": "^0.0.1",
+    "aws-sdk": "^2.1050.0",
+    "body-parser": "^1.19.1",
+    "express": "^4.17.2",
+    "g": "^2.0.1",
     "https": "^1.0.0",
     "knex": "^0.95.15",
-    "mysql2": "^2.3.3"
+    "lz-string": "^1.4.4",
+    "mysql2": "^2.3.3",
+    "ngrok": "^4.2.2",
+    "npm": "^8.3.0",
+    "properties-reader": "^2.2.0"
   }
 }

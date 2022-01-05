@@ -116,7 +116,7 @@ function retrieveSitemapsFromRobot(url) {
             let sitemapArray = [];
             let get_options = {
                 host: urlAux.host,
-                path: "/robots.txt",
+                path: urlAux.pathname + "/robots.txt",
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
@@ -203,17 +203,19 @@ function retrieveDefaultSitemapFilesLocation(urlToScrap) {
     try {
         let url = new URL(urlToScrap);
 
+        let urlBegin = url.protocol + "//" + url.host + (url.pathname ? url.pathname : "/");
+
         defaultSitemapFilesLocation = [
-            url.protocol + "//" + url.host + "/" + "sitemap.xml",
-            url.protocol + "//" + url.host + "/" + "sitemap.xml.gz",
-            url.protocol + "//" + url.host + "/" + "sitemap_index.xml",
-            url.protocol + "//" + url.host + "/" + "sitemap-index.xml",
-            url.protocol + "//" + url.host + "/" + "sitemap_index.xml.gz",
-            url.protocol + "//" + url.host + "/" + "sitemap-index.xml.gz",
-            url.protocol + "//" + url.host + "/" + ".sitemap.xml",
-            url.protocol + "//" + url.host + "/" + ".sitemap",
-            url.protocol + "//" + url.host + "/" + "admin/config/search/xmlsitemap",
-            url.protocol + "//" + url.host + "/" + "sitemap/sitemap-index.xml"
+            urlBegin + "sitemap.xml",
+            urlBegin + "sitemap.xml.gz",
+            urlBegin + "sitemap_index.xml",
+            urlBegin + "sitemap-index.xml",
+            urlBegin + "sitemap_index.xml.gz",
+            urlBegin + "sitemap-index.xml.gz",
+            urlBegin + ".sitemap.xml",
+            urlBegin + ".sitemap",
+            urlBegin + "admin/config/search/xmlsitemap",
+            urlBegin + "sitemap/sitemap-index.xml"
         ];
     }
     catch (error) {

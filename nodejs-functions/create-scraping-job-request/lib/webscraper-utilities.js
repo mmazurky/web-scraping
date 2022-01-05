@@ -1,4 +1,4 @@
-const lzString = require('lz-string');
+var lzString = require('lz-string');
 
 const retrieveScrapingConfigValue = function(body, configName) {
     let configValue = "";
