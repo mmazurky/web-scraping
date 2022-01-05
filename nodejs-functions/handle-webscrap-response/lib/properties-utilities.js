@@ -1,4 +1,4 @@
-const getProperty = function(filename, property) {
+const getProperty = function (filename, property) {
     let propertyValue = "";
 
     try {
@@ -14,15 +14,19 @@ const getProperty = function(filename, property) {
     return propertyValue;
 }
 
-const setProperty = function(filename, propertyName, propertyValue) {
+const setProperty = function (filename, propertyName, propertyValue) {
     return new Promise((resolve, reject) => {
         try {
             let propertiesPath = 'config/' + filename + ".properties";
-            
+
             const PropertiesReader = require('properties-reader');
-            let properties = PropertiesReader(propertiesPath, { writer: { saveSections: true } });
+            let properties = PropertiesReader(propertiesPath, {
+                writer: {
+                    saveSections: true
+                }
+            });
             properties.set(propertyName, propertyValue);
-            
+
             properties.save(propertiesPath, (err, data) => {
                 if (err) {
                     reject(error);
@@ -36,8 +40,8 @@ const setProperty = function(filename, propertyName, propertyValue) {
         }
     });
 }
-    
-    
+
+
 
 
 module.exports = {

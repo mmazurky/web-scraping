@@ -7,14 +7,14 @@ const bodyParser = require('body-parser')
 
 const serverPort = 5001;
 
-app.use( bodyParser.json() );       // to support JSON-encoded bodies
-app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
-  extended: true
-})); 
+app.use(bodyParser.json()); // to support JSON-encoded bodies
+app.use(bodyParser.urlencoded({ // to support URL-encoded bodies
+    extended: true
+}));
 
 app.post("/", (req, res) => {
     console.log("> Webscraper finished the scrap! " + JSON.stringify(req.body));
-    res.write('OK'); 
+    res.write('OK');
     res.end();
     main.handleWebscrapResponse(req.body).then(() => {
         console.log("----------------- SCRAPING PROCESS FINISHED WITH SUCCESS -----------------");
@@ -27,7 +27,7 @@ app.get("/", (req, res) => {
     res.send("");
 })
 
-app.get("/config", (req,res) => {
+app.get("/config", (req, res) => {
     let webscraperToken = propertiesUtilities.getProperty("webscraper", "token");
     let dbClient = propertiesUtilities.getProperty("database", "client");
     let dbName = propertiesUtilities.getProperty("database", "name");
@@ -132,15 +132,18 @@ function validateConfig(body) {
 }
 
 function connectToNgrok(token) {
-        return new Promise((resolve, reject) => {
-            ngrok.connect({authtoken: token, addr: serverPort}).then(url => {
+    return new Promise((resolve, reject) => {
+        ngrok.connect({
+            authtoken: token,
+            addr: serverPort
+        }).then(url => {
             console.log("> Define the url " + url + " in webscraper's webhook");
             console.log("> To configure the database and webscraper token, access " + "http://localhost:" + serverPort + "/config");
             resolve(true);
         }).catch(e => {
             console.log("> Failed to connect to ngrok! Access http://localhost:" + serverPort + "/config" + " to set the config info");
             reject(e);
-        });   
+        });
     });
 };
 

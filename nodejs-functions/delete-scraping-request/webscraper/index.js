@@ -1,17 +1,21 @@
 const https = require('https');
 
-const deleteScraping = function(scrapingJobId, sitemapId, webscraperToken) {
+const deleteScraping = function (scrapingJobId, sitemapId, webscraperToken) {
     return new Promise((resolve, reject) => {
         let scrapingJobDeletePath = "/api/v1/scraping-job/" + scrapingJobId + "?api_token=" + webscraperToken;
         let sitemapDeletePath = "/api/v1/sitemap/" + sitemapId + "?api_token=" + webscraperToken;
-    
+
         // deletes the scraping job
-        return callDeleteAPI(scrapingJobDeletePath).then(function() {
+        return callDeleteAPI(scrapingJobDeletePath).then(function () {
             // deletes the sitemap
             callDeleteAPI(sitemapDeletePath).then(() => {
                 resolve(true);
-            }).catch(function(e) {reject(e);});
-        }).catch(function(e) {reject(e);});
+            }).catch(function (e) {
+                reject(e);
+            });
+        }).catch(function (e) {
+            reject(e);
+        });
     });
 };
 
@@ -27,9 +31,9 @@ function callDeleteAPI(pathConfig) {
 
     // sends the delete request via webscrapper API
     return new Promise((resolve, reject) => {
-        var delete_req = https.request(delete_options, function(res) {
+        var delete_req = https.request(delete_options, function (res) {
             res.setEncoding('utf8');
-            res.on('data', function(chunk) {
+            res.on('data', function (chunk) {
                 let result = JSON.parse(chunk);
 
                 if (result.success) {
@@ -39,7 +43,7 @@ function callDeleteAPI(pathConfig) {
                     reject(chunk);
                 }
             });
-            res.on('error', function(e) {
+            res.on('error', function (e) {
                 console.log("Got error in " + pathConfig, e);
                 reject(e);
             });

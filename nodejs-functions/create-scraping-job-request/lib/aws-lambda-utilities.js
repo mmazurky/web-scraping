@@ -1,4 +1,4 @@
-const executeCallback = function(error, callback) {
+const executeCallback = function (error, callback) {
     let response = {
         status: !error ? 200 : 400,
         success: !error

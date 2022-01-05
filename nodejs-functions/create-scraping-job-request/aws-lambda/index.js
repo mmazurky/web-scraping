@@ -1,7 +1,7 @@
 const awsLambdaUtilities = require('../lib/aws-lambda-utilities');
 const webscraper = require('../webscraper/index')
 
-const handler = function(event, context, callback) {
+const handler = function (event, context, callback) {
     console.log('Received event:', event);
 
     try {
@@ -18,8 +18,7 @@ const handler = function(event, context, callback) {
             // returns the request status
             awsLambdaUtilities.executeCallback(error, callback);
         });
-    }
-    catch (error) {
+    } catch (error) {
         console.log("An exception has occurred: " + error);
         // returns the request status
         awsLambdaUtilities.executeCallback(error, callback);

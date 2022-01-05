@@ -3,7 +3,7 @@ const lambda = new AWS.Lambda();
 const https = require('https');
 const http = require('http');
 
-const executeCallback = function(error, callback) {
+const executeCallback = function (error, callback) {
     let response = {
         status: !error ? 200 : 400,
         success: !error
@@ -13,21 +13,20 @@ const executeCallback = function(error, callback) {
     callback(null, JSON.stringify(response));
 };
 
-const getBodyJson = function(event) {
+const getBodyJson = function (event) {
     try {
         return event.body && event.body != null ? JSON.parse(event.body) : null;
-    }
-    catch (e) {
+    } catch (e) {
         console.log("Exception: " + e);
     }
 };
 
-const getJsonPayload = function(data) {
+const getJsonPayload = function (data) {
     let hasPayload = data && data.Payload;
     return hasPayload ? JSON.parse(data.Payload) : null;
 };
 
-const callLambdaFunction = function(functionName, payload) {
+const callLambdaFunction = function (functionName, payload) {
     // calls another lambda function
     return new Promise((resolve, reject) => {
         var params = {
@@ -38,10 +37,10 @@ const callLambdaFunction = function(functionName, payload) {
         };
 
 
-        lambda.invoke(params, function(err, data) {
+        lambda.invoke(params, function (err, data) {
             let hasPayload = data && data.Payload;
             let jsonPayload = hasPayload ? JSON.parse(data.Payload) : null;
-            
+
             let success = hasPayload ? JSON.parse(jsonPayload).success : false;
 
             if (!success || err) {

@@ -1,7 +1,7 @@
 const https = require('https');
 const webscraperUtilities = require('../lib/webscraper-utilities.js');
 
-const createScrapingJob = function(sitemapId, webscraperToken) {
+const createScrapingJob = function (sitemapId, webscraperToken) {
     return new Promise((resolve, reject) => {
         try {
             var body = JSON.stringify({
@@ -25,9 +25,9 @@ const createScrapingJob = function(sitemapId, webscraperToken) {
 
 
             // Set up the request
-            var post_req = https.request(post_options, function(res) {
+            var post_req = https.request(post_options, function (res) {
                 res.setEncoding('utf8');
-                res.on('data', function(chunk) {
+                res.on('data', function (chunk) {
                     var resObj = JSON.parse(chunk);
 
                     if (resObj.data && resObj.data.id) {
@@ -36,7 +36,7 @@ const createScrapingJob = function(sitemapId, webscraperToken) {
                         reject(chunk);
                     }
                 });
-                res.on('error', function(e) {
+                res.on('error', function (e) {
                     reject(e);
                 });
 
@@ -45,8 +45,7 @@ const createScrapingJob = function(sitemapId, webscraperToken) {
             // post the data
             post_req.write(body);
             post_req.end();
-        }
-        catch (error) {
+        } catch (error) {
             reject(error);
         }
     });

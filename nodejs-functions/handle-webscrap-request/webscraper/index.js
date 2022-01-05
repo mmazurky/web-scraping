@@ -1,7 +1,7 @@
 const createSitemapRequest = require('create-sitemap-request');
 const createScrapingJobRequest = require('create-scraping-job-request');
 
-const handleWebscrapRequest = function(url, selector, webscraperToken) {
+const handleWebscrapRequest = function (url, selector, webscraperToken) {
     return new Promise((resolve, reject) => {
         try {
             console.log("----------------- STARTING SCRAPING REQUEST -----------------");
@@ -24,8 +24,7 @@ const handleWebscrapRequest = function(url, selector, webscraperToken) {
                 console.log("-Error creating sitemap: " + e);
                 reject(e);
             });
-        }
-        catch (error) {
+        } catch (error) {
             reject(error);
         }
     });

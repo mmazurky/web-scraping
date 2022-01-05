@@ -1,7 +1,7 @@
 const awsLambdaUtilities = require('../lib/aws-lambda-utilities');
 const database = require('../database/index')
 
-const handler = function(event, context, callback) {
+const handler = function (event, context, callback) {
     console.log('Received event:', event);
 
     try {
@@ -20,8 +20,8 @@ const handler = function(event, context, callback) {
         }).catch(error => {
             console.log("An exception has occurred: " + error);
             // returns the request status
-            awsLambdaUtilities.executeCallback(error, callback);    
-            
+            awsLambdaUtilities.executeCallback(error, callback);
+
         });
     } catch (error) {
         console.log("An exception has occurred: " + error);

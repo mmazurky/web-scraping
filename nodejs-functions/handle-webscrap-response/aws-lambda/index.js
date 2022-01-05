@@ -2,7 +2,7 @@ const awsLambdaUtilities = require('../lib/aws-lambda-utilities');
 const webscraperUtilities = require('../lib/webscraper-utilities');
 const webscraper = require('../webscraper/index')
 
-const handler = function(event, context) {
+const handler = function (event, context) {
     try {
         handleWebscrapResponse(event).then(() => {
             console.log("Finished with success!");
@@ -28,15 +28,24 @@ function handleWebscrapResponse(event) {
             let webscraperToken = awsLambdaUtilities.retrieveScrapingConfigValue(event, "webscraper_token");
 
             // retrieves the scraping result
-            return webscraper.retrieveScrapingResult(scrapingJobId,webscraperToken).then(scrapingResult => {
+            return webscraper.retrieveScrapingResult(scrapingJobId, webscraperToken).then(scrapingResult => {
                 // saves the scraping result to DB
                 awsLambdaUtilities.callLambdaFunction('save-scraping-result-to-db', scrapingResult).then(() => {
                     // deletes the scraping request
-                    awsLambdaUtilities.callLambdaFunction('delete-scraping-request', { "scrapingJobId": scrapingJobId, "sitemapId": sitemapId }).then(() => {
+                    awsLambdaUtilities.callLambdaFunction('delete-scraping-request', {
+                        "scrapingJobId": scrapingJobId,
+                        "sitemapId": sitemapId
+                    }).then(() => {
                         resolve(true);
-                    }).catch(e => { reject(e); })
-                }).catch(e => { reject(e); })
-            }).catch(e => { reject(e); })
+                    }).catch(e => {
+                        reject(e);
+                    })
+                }).catch(e => {
+                    reject(e);
+                })
+            }).catch(e => {
+                reject(e);
+            })
         } catch (e) {
             reject(e);
         }

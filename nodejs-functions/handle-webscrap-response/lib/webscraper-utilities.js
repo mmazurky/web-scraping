@@ -1,6 +1,6 @@
 const lzString = require('lz-string');
 
-const retrieveScrapingConfigValue = function(body, configName) {
+const retrieveScrapingConfigValue = function (body, configName) {
     let configValue = "";
 
     let responseBody = body.split("&");
@@ -16,7 +16,7 @@ const retrieveScrapingConfigValue = function(body, configName) {
 };
 
 function compressString(string) {
-    try {       
+    try {
         return lzString.compress(string);
     } catch (error) {
         console.log("error: " + error);
@@ -25,7 +25,7 @@ function compressString(string) {
 }
 
 function decompressString(string) {
-    try {       
+    try {
         return lzString.decompress(string);
     } catch (error) {
         console.log("error: " + error);

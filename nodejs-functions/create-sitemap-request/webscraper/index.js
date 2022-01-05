@@ -1,7 +1,7 @@
 const https = require('https');
 const http = require('http');
 
-const createSitemap = function(url, selector, webscraperToken) {
+const createSitemap = function (url, selector, webscraperToken) {
     return new Promise((resolve, reject) => {
         try {
             getSitemaps(url).then(sitemapArray => {
@@ -31,8 +31,7 @@ function getSitemaps(url) {
                     }).catch(e => reject(e));
                 }
             }).catch(e => reject(e));
-        }
-        catch (error) {
+        } catch (error) {
             reject(error);
         }
     });
@@ -82,9 +81,9 @@ function createSiteMap(url, sitemapArray, selector, webscraperToken) {
             };
 
             // Set up the request
-            let post_req = https.request(post_options, function(res) {
+            let post_req = https.request(post_options, function (res) {
                 res.setEncoding('utf8');
-                res.on('data', function(chunk) {
+                res.on('data', function (chunk) {
                     let resObj = JSON.parse(chunk);
 
                     if (resObj.data && resObj.data.id) {
@@ -93,7 +92,7 @@ function createSiteMap(url, sitemapArray, selector, webscraperToken) {
                         reject(chunk);
                     }
                 });
-                res.on('error', function(e) {
+                res.on('error', function (e) {
                     reject(e);
                 });
             });
@@ -101,8 +100,7 @@ function createSiteMap(url, sitemapArray, selector, webscraperToken) {
             // post the data
             post_req.write(body);
             post_req.end();
-        }
-        catch (error) {
+        } catch (error) {
             reject(error);
         }
     });
@@ -125,9 +123,9 @@ function retrieveSitemapsFromRobot(url) {
 
             // Set up the request
             const protocol = urlAux.protocol.startsWith('https') ? https : http;
-            let get_req = protocol.request(get_options, function(res) {
+            let get_req = protocol.request(get_options, function (res) {
                 res.setEncoding('utf8');
-                res.on('data', function(chunk) {
+                res.on('data', function (chunk) {
                     let splitted = chunk.split(/\r?\n/);
                     for (let i = 0; i < splitted.length; i++) {
                         if (splitted[i].includes("Sitemap:")) {
@@ -135,10 +133,10 @@ function retrieveSitemapsFromRobot(url) {
                         }
                     }
                 });
-                res.on('error', function(e) {
+                res.on('error', function (e) {
                     reject(e);
                 });
-                res.on('end', function(chunk) {
+                res.on('end', function (chunk) {
                     console.log(sitemapArray.length > 0 ? "-Sitemaps found in robot.xml: " + sitemapArray : "-Sitemaps not found in robots.txt");
                     resolve(sitemapArray);
                 });
@@ -146,8 +144,7 @@ function retrieveSitemapsFromRobot(url) {
 
             // get the data
             get_req.end();
-        }
-        catch (e) {
+        } catch (e) {
             reject(e);
         }
     });
@@ -217,8 +214,7 @@ function retrieveDefaultSitemapFilesLocation(urlToScrap) {
             urlBegin + "admin/config/search/xmlsitemap",
             urlBegin + "sitemap/sitemap-index.xml"
         ];
-    }
-    catch (error) {
+    } catch (error) {
         console.log("An exception has occurred: " + error);
     }
 

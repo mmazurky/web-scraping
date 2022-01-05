@@ -6,13 +6,15 @@ const bodyParser = require('body-parser');
 
 const serverPort = 5000;
 
-app.use( bodyParser.json() );       // to support JSON-encoded bodies
-app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
+app.use(bodyParser.json()); // to support JSON-encoded bodies
+app.use(bodyParser.urlencoded({ // to support URL-encoded bodies
   extended: true
-})); 
+}));
 
 app.get("/scrap", (req, res) => {
-    res.send(`
+  let selector = propertiesUtilities.getProperty("webscraper", "selector");
+
+  res.send(`
     <!DOCTYPE html>
 <html>
 <body>
@@ -23,7 +25,7 @@ app.get("/scrap", (req, res) => {
   <label for="url"><b>URL:</b></label>
   <input type="text" id="url" name="url"><br><br>
   <label for="selector"><b>Element Selector:</b></label>
-  <input type="text" id="selector" name="selector" value="h1"><br><br>
+  <input type="text" id="selector" name="selector" value="` + (selector != '' ? selector : "h1") + `"><br><br>
   <input type="submit" value="Submit">
 </form>
 
@@ -36,13 +38,15 @@ app.get("/scrap", (req, res) => {
 app.post("/scrap", (req, res) => {
   let webscraperToken = propertiesUtilities.getProperty("webscraper", "token");
 
-    main.sendScrapingRequest(req.body.url, req.body.selector, webscraperToken).then(scrapingJobId => res.send("Scraping Request finished with success! Scraping Job Id: " + scrapingJobId)).catch(e => {
-        console.log("An error has occurred: " + e);
-        res.send("An error has occurred: " + e);
-    });
+  main.sendScrapingRequest(req.body.url, req.body.selector, webscraperToken).then(scrapingJobId => res.send("Scraping Request finished with success! Scraping Job Id: " + scrapingJobId)).catch(e => {
+    console.log("An error has occurred: " + e);
+    res.send("An error has occurred: " + e);
+  });
+
+  propertiesUtilities.setProperty("webscraper", "selector", req.body.selector).then(() => {}).catch(e => {});
 });
 
-app.get("/config", (req,res) => {
+app.get("/config", (req, res) => {
   let webscraperToken = propertiesUtilities.getProperty("webscraper", "token");
 
   res.send(`
@@ -65,24 +69,24 @@ app.post("/config", (req, res) => {
   let configIsValid = validateConfigResult == '';
 
   if (configIsValid) {
-      propertiesUtilities.setProperty("webscraper", "token", req.body.webscraperToken).then(() => {
-        res.send("Config saved with success!");
-      }).catch(e => res.send("Error saving the config: " + error));
+    propertiesUtilities.setProperty("webscraper", "token", req.body.webscraperToken).then(() => {
+      res.send("Config saved with success!");
+    }).catch(e => res.send("Error saving the config: " + error));
   } else {
-      res.send(validateConfigResult + " cannot be empty")
+    res.send(validateConfigResult + " cannot be empty")
   }
 
 });
 
 app.listen(serverPort, () => {
-    console.log(`================ SCRAP REQUEST MODULE STARTED! ================`);
+  console.log(`================ SCRAP REQUEST MODULE STARTED! ================`);
 
-    if (!validateWebscraperToken()) {
-      console.log("> A webscraper token is needed to perform the tests. You must set it in the config page.")
-    }
+  if (!validateWebscraperToken()) {
+    console.log("> A webscraper token is needed to perform the tests. You must set it in the config page.")
+  }
 
-    console.log("> To configure the webscraper token, access " + "http://localhost:" + serverPort + "/config");
-    console.log("> Access http://localhost:" + serverPort + "/scrap for tests");
+  console.log("> To configure the webscraper token, access " + "http://localhost:" + serverPort + "/config");
+  console.log("> Access http://localhost:" + serverPort + "/scrap for tests");
 });
 
 function validateWebscraperToken() {
@@ -91,7 +95,7 @@ function validateWebscraperToken() {
 
 function validateConfig(body) {
   if (body.webscraperToken == '') {
-      return "Webscraper token";
+    return "Webscraper token";
   }
 
   return "";

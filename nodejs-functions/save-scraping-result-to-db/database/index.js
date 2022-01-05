@@ -1,14 +1,14 @@
 // possible dbClients = pg, mysql2, oracledb - default is mysql2
-const saveToDB = function(scrapingData, dbHost, dbUser, dbPassword, dbName, dbClient) {
+const saveToDB = function (scrapingData, dbHost, dbUser, dbPassword, dbName, dbClient) {
     return new Promise((resolve, reject) => {
         try {
             // uses the column 'scraping_data' to store the result
-            let scrapingResult = [
-                { scraping_data: scrapingData }
-            ]
+            let scrapingResult = [{
+                scraping_data: scrapingData
+            }]
 
             let dbClientAux = dbClient ? dbClient : 'mysql2';
-        
+
             // starts the db library 
             const knex = require('knex')({
                 client: dbClientAux,
@@ -19,7 +19,7 @@ const saveToDB = function(scrapingData, dbHost, dbUser, dbPassword, dbName, dbCl
                     password: dbPassword
                 }
             });
-            
+
             // inserts the result in tb_scraping table
             knex('tb_scraping').insert(scrapingResult).then(() => {
                 knex.destroy();
