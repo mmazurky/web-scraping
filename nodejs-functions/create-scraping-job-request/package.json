@@ -6,7 +6,6 @@
   "author": "Marcelo Mazurky",
   "license": "ISC",
   "dependencies": {
-    "https": "^1.0.0",
-    "lz-string": "^1.4.4"
+    "https": "^1.0.0"
   }
 }

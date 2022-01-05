@@ -1,6 +1,12 @@
+//initializes the libraries
 const awsLambdaUtilities = require('../lib/aws-lambda-utilities');
 const webscraper = require('../webscraper/index')
 
+/**
+ * Handler method used by AWS Lambda
+ * @param {string} event 
+ * @param {*} context 
+ */
 const handler = function (event, context, callback) {
     console.log('Received event:', event);
 
