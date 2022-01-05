@@ -1,8 +1,15 @@
+//initializes the libraries
 const https = require('https');
 const propertiesUtilities = require('../lib/properties-utilities');
 const saveScrapingResultToDb = require('save-scraping-result-to-db');
 const deleteScrapingRequest = require('delete-scraping-request');
 
+/**
+ * Retrieves the scraping result from webscraper
+ * @param {number} scrapingJobId 
+ * @param {string} webscraperToken 
+ * @returns 
+ */
 function retrieveScrapingResult(scrapingJobId, webscraperToken) {
     return new Promise((resolve, reject) => {
         // mounts the URL to get the scraping result
@@ -22,6 +29,11 @@ function retrieveScrapingResult(scrapingJobId, webscraperToken) {
     });
 };
 
+/**
+ * Handles the Scrap response
+ * @param {*} event 
+ * @returns 
+ */
 const handleWebscrapResponse = function (event) {
     return new Promise((resolve, reject) => {
         try {

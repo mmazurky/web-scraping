@@ -104,10 +104,19 @@ app.listen(serverPort, () => {
   console.log("> Access http://localhost:" + serverPort + "/scrap for tests");
 });
 
+/**
+ * Validates the webscraper's token in properties file
+ * @returns 
+ */
 function validateWebscraperToken() {
   return propertiesUtilities.getProperty("webscraper", "token") != '';
 }
 
+/**
+ * Validates the config update
+ * @param {*} body 
+ * @returns 
+ */
 function validateConfig(body) {
   if (body.webscraperToken == '') {
     return "Webscraper token";

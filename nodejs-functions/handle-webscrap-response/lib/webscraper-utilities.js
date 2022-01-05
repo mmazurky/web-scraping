@@ -1,12 +1,19 @@
-const lzString = require('lz-string');
-
+/**
+ * Retrieves the scraping config value
+ * received from webscraper
+ * @param {*} body 
+ * @param {string} configName 
+ * @returns 
+ */
 const retrieveScrapingConfigValue = function (body, configName) {
     let configValue = "";
 
+    //gets the response body (splitted by &)
     let responseBody = body.split("&");
 
     for (var i = 0; i < responseBody.length; i++) {
         if (responseBody[i].includes(configName)) {
+            //gets the config value
             configValue = responseBody[i].replace(configName + "=", "");
             break;
         }
@@ -15,26 +22,6 @@ const retrieveScrapingConfigValue = function (body, configName) {
     return configValue;
 };
 
-function compressString(string) {
-    try {
-        return lzString.compress(string);
-    } catch (error) {
-        console.log("error: " + error);
-        return "";
-    }
-}
-
-function decompressString(string) {
-    try {
-        return lzString.decompress(string);
-    } catch (error) {
-        console.log("error: " + error);
-        return "";
-    }
-}
-
 module.exports = {
-    retrieveScrapingConfigValue,
-    compressString,
-    decompressString
+    retrieveScrapingConfigValue
 };

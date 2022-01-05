@@ -1,9 +1,14 @@
+//initializes the libraries
 const AWS = require('aws-sdk');
 const lambda = new AWS.Lambda();
-const https = require('https');
-const http = require('http');
 
+/**
+ * Execute the callback for the AWS Lambda function
+ * @param {error} error 
+ * @param {*} callback 
+ */
 const executeCallback = function (error, callback) {
+    // mounts the JSON response
     let response = {
         status: !error ? 200 : 400,
         success: !error
@@ -13,6 +18,11 @@ const executeCallback = function (error, callback) {
     callback(null, JSON.stringify(response));
 };
 
+/**
+ * Gets the body's request in JSON format
+ * @param {*} event 
+ * @returns 
+ */
 const getBodyJson = function (event) {
     try {
         return event.body && event.body != null ? JSON.parse(event.body) : null;
@@ -21,14 +31,25 @@ const getBodyJson = function (event) {
     }
 };
 
+/**
+ * Gets the JSON Payload
+ * @param {*} data 
+ * @returns 
+ */
 const getJsonPayload = function (data) {
     let hasPayload = data && data.Payload;
     return hasPayload ? JSON.parse(data.Payload) : null;
 };
 
+/**
+ * Calls another AWS Lambda function
+ * @param {string} functionName 
+ * @param {string} payload 
+ * @returns 
+ */
 const callLambdaFunction = function (functionName, payload) {
-    // calls another lambda function
     return new Promise((resolve, reject) => {
+        //defines the parameters
         var params = {
             FunctionName: functionName,
             InvocationType: 'RequestResponse',
@@ -36,9 +57,11 @@ const callLambdaFunction = function (functionName, payload) {
             Payload: JSON.stringify(payload)
         };
 
-
+        //invokes the function
         lambda.invoke(params, function (err, data) {
+            //checks if the payload is present
             let hasPayload = data && data.Payload;
+            //gets the JSON Payload
             let jsonPayload = hasPayload ? JSON.parse(data.Payload) : null;
 
             let success = hasPayload ? JSON.parse(jsonPayload).success : false;
@@ -53,13 +76,22 @@ const callLambdaFunction = function (functionName, payload) {
     });
 };
 
+/**
+ * Retrieves the scraping config value
+ * received from webscraper in AWS Lambda
+ * @param {*} event 
+ * @param {string} configName 
+ * @returns 
+ */
 const retrieveScrapingConfigValue = function (event, configName) {
     let configValue = "";
 
+    //gets the response body (splitted by &)
     let responseBody = Buffer.from(event.body, 'base64').toString().split("&");
 
     for (var i = 0; i < responseBody.length; i++) {
         if (responseBody[i].includes(configName)) {
+            //gets the config value
             configValue = responseBody[i].replace(configName + "=", "");
             break;
         }

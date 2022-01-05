@@ -1,7 +1,12 @@
+//initializes the libraries
 const awsLambdaUtilities = require('../lib/aws-lambda-utilities');
-const webscraperUtilities = require('../lib/webscraper-utilities');
 const webscraper = require('../webscraper/index')
 
+/**
+ * Handler method used by AWS Lambda
+ * @param {string} event 
+ * @param {*} context 
+ */
 const handler = function (event, context) {
     try {
         handleWebscrapResponse(event).then(() => {
@@ -17,6 +22,11 @@ const handler = function (event, context) {
     }
 };
 
+/**
+ * Handles the Scrap response
+ * @param {*} event 
+ * @returns 
+ */
 function handleWebscrapResponse(event) {
     return new Promise((resolve, reject) => {
         try {
