@@ -1,4 +1,13 @@
-// possible dbClients = pg, mysql2, oracledb - default is mysql2
+/**
+ * Saves the Scraping Data to Database
+ * @param {object} scrapingData 
+ * @param {string} dbHost 
+ * @param {string} dbUser 
+ * @param {string} dbPassword 
+ * @param {string} dbName 
+ * @param {string} dbClient pg, mysql2, oracledb - default is mysql2
+ * @returns 
+ */
 const saveToDB = function (scrapingData, dbHost, dbUser, dbPassword, dbName, dbClient) {
     return new Promise((resolve, reject) => {
         try {

@@ -1,6 +1,13 @@
+//initializes the libraries
 const awsLambdaUtilities = require('../lib/aws-lambda-utilities');
 const database = require('../database/index')
 
+/**
+ * Handler method used by AWS Lambda
+ * @param {*} event 
+ * @param {*} context 
+ * @param {*} callback 
+ */
 const handler = function (event, context, callback) {
     console.log('Received event:', event);
 
