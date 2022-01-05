@@ -1,10 +1,20 @@
+//initializes the libraries
 const https = require('https');
 const http = require('http');
 
+/**
+ * Creates the sitemap in webscraper
+ * @param {string} url 
+ * @param {string} selector 
+ * @param {string} webscraperToken 
+ * @returns 
+ */
 const createSitemap = function (url, selector, webscraperToken) {
     return new Promise((resolve, reject) => {
         try {
+            //gets the sitemaps from the requested page
             getSitemaps(url).then(sitemapArray => {
+                //creates a sitemap in webscraper
                 createSiteMap(url, sitemapArray, selector, webscraperToken).then(sitemapId => {
                     resolve(sitemapId);
                 }).catch(e => {
@@ -17,6 +27,11 @@ const createSitemap = function (url, selector, webscraperToken) {
     });
 }
 
+/**
+ * Gets the sitemaps from the page
+ * @param {string} url 
+ * @returns 
+ */
 function getSitemaps(url) {
     return new Promise((resolve, reject) => {
         try {
@@ -26,6 +41,7 @@ function getSitemaps(url) {
                 if (sitemapArray && sitemapArray.length > 0) {
                     resolve(sitemapArray);
                 } else {
+                    //tries to get the sitemaps from the default paths
                     retrieveSitemapsFromDefaultPaths(url).then(sitemapArray => {
                         resolve(sitemapArray);
                     }).catch(e => reject(e));
@@ -38,12 +54,20 @@ function getSitemaps(url) {
 
 }
 
+/**
+ * Creates a sitemap in webscraper
+ * @param {string} url 
+ * @param {array} sitemapArray 
+ * @param {string} selector 
+ * @param {string} webscraperToken 
+ * @returns 
+ */
 function createSiteMap(url, sitemapArray, selector, webscraperToken) {
     return new Promise((resolve, reject) => {
         try {
             let selectors = [];
 
-            // generates a uniqueid
+            // generates a uniqueid for the sitemap (it is needed to allow concurrent scrap requests)
             let urlAux = new URL(url);
             let uniqueid = urlAux.hostname.replace(/\W/g, '-') + "-" + new Date().getTime();
 
@@ -106,6 +130,11 @@ function createSiteMap(url, sitemapArray, selector, webscraperToken) {
     });
 }
 
+/**
+ * Retrieves the sitemaps from the robots.txt file
+ * @param {string} url 
+ * @returns 
+ */
 function retrieveSitemapsFromRobot(url) {
     return new Promise((resolve, reject) => {
         try {
@@ -121,7 +150,7 @@ function retrieveSitemapsFromRobot(url) {
                 }
             };
 
-            // Set up the request
+            //sends the request
             const protocol = urlAux.protocol.startsWith('https') ? https : http;
             let get_req = protocol.request(get_options, function (res) {
                 res.setEncoding('utf8');
@@ -150,6 +179,11 @@ function retrieveSitemapsFromRobot(url) {
     });
 }
 
+/**
+ * Retrieves the "sitemap xml link" selector for webscraper
+ * @param {array} sitemapArray 
+ * @returns 
+ */
 function retrieveSelectorSitemapXmlLink(sitemapArray) {
     return {
         "id": "sitemap",
@@ -163,6 +197,12 @@ function retrieveSelectorSitemapXmlLink(sitemapArray) {
     };
 }
 
+/**
+ * Retrieves the "custom text" selector for webscraper
+ * @param {string} selector 
+ * @param {array} sitemapArray 
+ * @returns 
+ */
 function retrieveCustomSelectorText(selector, sitemapArray) {
     return {
         "id": "custom",
@@ -177,6 +217,11 @@ function retrieveCustomSelectorText(selector, sitemapArray) {
     };
 }
 
+/**
+ * Retrieves the sitemaps from its default paths
+ * @param {string} urlToScrap 
+ * @returns 
+ */
 function retrieveSitemapsFromDefaultPaths(urlToScrap) {
     return new Promise((resolve, reject) => {
         let sitemapArray = [];
@@ -194,6 +239,11 @@ function retrieveSitemapsFromDefaultPaths(urlToScrap) {
     });
 }
 
+/**
+ * Retrieves the default sitemap files' location
+ * @param {string} urlToScrap 
+ * @returns 
+ */
 function retrieveDefaultSitemapFilesLocation(urlToScrap) {
     let defaultSitemapFilesLocation = [];
 
@@ -221,6 +271,11 @@ function retrieveDefaultSitemapFilesLocation(urlToScrap) {
     return defaultSitemapFilesLocation;
 }
 
+/**
+ * Check if the path exists
+ * @param {string} path 
+ * @returns 
+ */
 function pathExists(path) {
     return new Promise((resolve, reject) => {
         // mounts the URL to get the scraping result
