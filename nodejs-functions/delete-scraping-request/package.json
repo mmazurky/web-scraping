@@ -2,14 +2,14 @@
   "name": "delete-scraping-request",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "main": "src/app.js",
   "author": "Marcelo Mazurky",
   "license": "ISC",
+  "type": "module",
   "dependencies": {
-    "aws-sdk": "^2.1050.0",
-    "https": "^1.0.0"
+    "axios": "^0.24.0",
+    "https": "^1.0.0",
+    "path": "^0.12.7",
+    "properties-reader": "^2.2.0"
   }
 }
