@@ -2,9 +2,9 @@
   "name": "create-sitemap-request",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/app.js",
   "type": "module",
-  "author": "Objective",
+  "author": "Marcelo Mazurky",
   "license": "ISC",
   "dependencies": {
     "axios": "^0.24.0",
