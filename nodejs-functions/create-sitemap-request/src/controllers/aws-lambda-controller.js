@@ -2,7 +2,7 @@ import { WebscraperController } from './webscraper-controller.js';
 import { executeCallback } from "../utils/aws-lambda-utilities.js"
 import { getEnvProperty } from '../utils/properties-utilities.js'
 
-export class AwsLambdaController {
+class AwsLambdaController {
     /**
      * Handler method used by AWS Lambda
      * @param {string} event 
@@ -34,3 +34,7 @@ export class AwsLambdaController {
         }
     };
 }
+
+export {
+    AwsLambdaController
+};

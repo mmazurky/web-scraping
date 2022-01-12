@@ -8,7 +8,6 @@
   "type": "module",
   "dependencies": {
     "axios": "^0.24.0",
-    "es6-module-loader": "^0.17.11",
     "path": "^0.12.7",
     "properties-reader": "^2.2.0"
   }

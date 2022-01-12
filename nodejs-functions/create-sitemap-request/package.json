@@ -8,6 +8,8 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^0.24.0",
+    "path": "^0.12.7",
+    "properties-reader": "^2.2.0",
     "url-exist": "^3.0.0"
   }
 }

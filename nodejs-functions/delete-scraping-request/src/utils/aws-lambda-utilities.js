@@ -14,10 +14,6 @@ class AwsLambdaUtilities {
         // executes the callback
         callback(null, JSON.stringify(response));
     };
-
-    static test() {
-        console.log("aaaaaa");
-    }
 }
 
-export default { executeCallback, test };
+export const executeCallback = AwsLambdaUtilities.executeCallback;
