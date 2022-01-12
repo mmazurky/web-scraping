@@ -2,10 +2,14 @@
   "name": "create-scraping-job-request",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
-  "author": "Marcelo Mazurky",
+  "main": "src/app.js",
+  "author": "Objective",
   "license": "ISC",
+  "type": "module",
   "dependencies": {
-    "https": "^1.0.0"
+    "axios": "^0.24.0",
+    "es6-module-loader": "^0.17.11",
+    "path": "^0.12.7",
+    "properties-reader": "^2.2.0"
   }
 }
