@@ -11,15 +11,13 @@ class WebscraperController {
         return new Promise((resolve, reject) => {
             try {
                 //sends the request
-                axios.post("https://api.webscraper.io/api/v1/scraping-job?api_token=" + webscraperToken,
-                    {
-                        "sitemap_id": sitemapId,
-                        "driver": "fast", // "fast" or "fulljs"
-                        "page_load_delay": 2000,
-                        "request_interval": 2000,
-                        "proxy": 0
-                    }
-                ).then(res => {
+                axios.post("https://api.webscraper.io/api/v1/scraping-job?api_token=" + webscraperToken, {
+                    "sitemap_id": sitemapId,
+                    "driver": "fast", // "fast" or "fulljs"
+                    "page_load_delay": 2000,
+                    "request_interval": 2000,
+                    "proxy": 0
+                }).then(res => {
                     //if the scraping job id is present in the response, it was created with success
                     if (res && res.data && res.data.data && res.data.data.id) {
                         resolve(res.data.data.id);

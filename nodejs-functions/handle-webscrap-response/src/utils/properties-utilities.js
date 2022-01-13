@@ -1,13 +1,13 @@
 import PropertiesReader from 'properties-reader';
 import Path from 'path';
 
-class PropertiesUtilities {   
+class PropertiesUtilities {
     /**
      * Retrieves a property from the .env file (or in the environment itself)
      * @param {string} property 
      * @returns 
      */
-     static getEnvProperty(property) {
+    static getEnvProperty(property) {
         try {
             let properties = PropertiesReader(Path.resolve('.env'));
 
@@ -25,7 +25,7 @@ class PropertiesUtilities {
      * @param {*} propertyValue 
      * @returns 
      */
-     static setEnvProperty(propertyName, propertyValue) {
+    static setEnvProperty(propertyName, propertyValue) {
         return new Promise((resolve, reject) => {
             try {
                 let propertiesPath = Path.resolve('.env');
@@ -36,7 +36,7 @@ class PropertiesUtilities {
                     }
                 });
                 properties.set(propertyName, propertyValue);
-    
+
                 //saves the property value
                 properties.save(propertiesPath, (err, data) => {
                     if (err) {

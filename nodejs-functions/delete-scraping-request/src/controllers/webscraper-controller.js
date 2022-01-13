@@ -14,7 +14,7 @@ class WebscraperController {
             let scrapingJobDeletePath = "https://api.webscraper.io/api/v1/scraping-job/" + scrapingJobId + "?api_token=" + webscraperToken;
             //default sitemap delete's path
             let sitemapDeletePath = "https://api.webscraper.io/api/v1/sitemap/" + sitemapId + "?api_token=" + webscraperToken;
-    
+
             // deletes the scraping job
             return this.callDeleteAPI(scrapingJobDeletePath).then(function () {
                 // deletes the sitemap
@@ -28,7 +28,7 @@ class WebscraperController {
             });
         });
     };
-    
+
     /**
      * Calls the webscraper's DELETE API
      * @param {string} url 
@@ -39,7 +39,7 @@ class WebscraperController {
         return new Promise((resolve, reject) => {
             axios.delete(url).then(res => {
                 let result = JSON.parse(res.data);
-    
+
                 if (result.success) {
                     resolve(res);
                 } else {

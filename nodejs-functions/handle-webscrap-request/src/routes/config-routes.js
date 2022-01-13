@@ -14,7 +14,7 @@ router.get("/", (req, res) => {
 /**
  * http update the configs
  */
- router.post("/", (req, res) => {
+router.post("/", (req, res) => {
     //validates the config update's request
     let validateConfigResult = validateConfig(req.body);
     let configIsValid = validateConfigResult == '';

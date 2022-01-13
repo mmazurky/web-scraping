@@ -59,8 +59,12 @@ class WebscraperController {
                         deleteScraping(scrapingJobId, sitemapId, webscraperToken).then(() => {
                             console.log("-Scrap Request deleted with success!")
                             resolve(true);
-                        }).catch(e => { reject(e); });
-                    }).catch(e => { reject(e); });
+                        }).catch(e => {
+                            reject(e);
+                        });
+                    }).catch(e => {
+                        reject(e);
+                    });
                 }).catch(e => {
                     reject(e);
                 });

@@ -10,11 +10,11 @@ class AwsLambdaController {
      */
     handler(event, context, callback) {
         console.log('Received event:', event);
-    
+
         try {
             //instantiates the controller
             let databaseController = new DatabaseController();
-    
+
             // saves the result to the DB
             databaseController.saveScrapingResultToDB(event).then(() => {
                 console.log("Finished with success!");
@@ -24,7 +24,6 @@ class AwsLambdaController {
                 console.log("An exception has occurred: " + error);
                 // returns the request status
                 executeCallback(error, callback);
-    
             });
         } catch (error) {
             console.log("An exception has occurred: " + error);

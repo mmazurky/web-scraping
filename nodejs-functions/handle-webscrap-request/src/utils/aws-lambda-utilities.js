@@ -11,7 +11,7 @@ class AwsLambdaUtilities {
             console.log("Exception: " + e);
         }
     };
-    
+
     /**
      * Gets the JSON Payload
      * @param {*} data 

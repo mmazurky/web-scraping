@@ -2,7 +2,7 @@
   "name": "save-scraping-result-to-db",
   "version": "1.0.0",
   "description": "Saves the webscraper' scraping result to the database",
-  "type":"module",
+  "type": "module",
   "main": "src/app.js",
   "author": "Marcelo Mazurky",
   "license": "ISC",

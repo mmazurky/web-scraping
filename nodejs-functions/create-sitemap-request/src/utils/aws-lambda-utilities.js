@@ -12,7 +12,7 @@ class AwsLambdaUtilities {
             success: !error,
             sitemapId: sitemapId
         };
-    
+
         // executes the callback
         callback(null, JSON.stringify(response));
     };

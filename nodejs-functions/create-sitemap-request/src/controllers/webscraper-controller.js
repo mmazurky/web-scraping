@@ -63,7 +63,7 @@ class WebscraperController {
      * @param {string} webscraperToken 
      * @returns 
      */
-     createSitemapRequest(url, sitemapArray, selector, webscraperToken) {
+    createSitemapRequest(url, sitemapArray, selector, webscraperToken) {
         return new Promise((resolve, reject) => {
             try {
                 let selectors = [];
@@ -118,23 +118,23 @@ class WebscraperController {
     retrieveSitemapsFromRobot(url) {
         return new Promise((resolve, reject) => {
             try {
-                console.log("> Searching for sitemaps in robots.txt");       
+                console.log("> Searching for sitemaps in robots.txt");
                 let sitemapArray = [];
-                
+
                 // formats the robots' file path
                 let urlAux = new URL(url);
                 let robotsFilePath = urlAux.protocol + "//" + urlAux.host + urlAux.pathname + "robots.txt";
 
                 // defines the callback functions
-                let successCallback = function() {
+                let successCallback = function () {
                     console.log(sitemapArray.length > 0 ? "-Sitemaps found in robot.xml: " + sitemapArray : "-Sitemaps not found in robots.txt");
                     resolve(sitemapArray);
                 }
-                let errorCallback = function(e) {
+                let errorCallback = function (e) {
                     console.log("Error: " + e);
                     resolve(sitemapArray);
                 }
-                
+
                 // checks if robots.txt file exists
                 urlExist(robotsFilePath).then(exists => {
                     if (exists) {
@@ -148,7 +148,7 @@ class WebscraperController {
                                     sitemapArray.push(splitted[i].replace("Sitemap:", "").replace(/\s/g, ""));
                                 }
                             }
-                            successCallback();                  
+                            successCallback();
                         }).catch(e => {
                             errorCallback(e);
                         })
@@ -156,7 +156,7 @@ class WebscraperController {
                         // robots.txt file not found - in this case, continues the process to find the sitemaps in other places
                         successCallback();
                     }
-                }).catch(e => console.log("An error has occurred: " + e));               
+                }).catch(e => console.log("An error has occurred: " + e));
             } catch (e) {
                 errorCallback(e);
             }

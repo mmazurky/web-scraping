@@ -1,14 +1,6 @@
 //initializes the libraries
-import {
-    deleteScraping
-} from "delete-scraping-request";
-import {
-    executeSuccessCallback,
-    executeErrorCallback
-} from "../utils/aws-lambda-utilities.js";
-import {
-    WebscraperController
-} from "./webscraper-controller.js";
+import { executeSuccessCallback, executeErrorCallback } from "../utils/aws-lambda-utilities.js";
+import { WebscraperController } from "./webscraper-controller.js";
 
 class AwsLambdaController {
     constructor() {

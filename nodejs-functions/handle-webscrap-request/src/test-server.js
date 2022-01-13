@@ -16,7 +16,7 @@ configExpress(app);
 /**
  * Starts the server
  */
- app.listen(serverPort, () => {
+app.listen(serverPort, () => {
   console.log(`================ SCRAP REQUEST MODULE STARTED! ================`);
 
   //validates if the webscraper's token is filled in properties file
@@ -31,9 +31,9 @@ configExpress(app);
 /**
  * Adds the Scrap routes
  */
- app.use('/scrap', ScrapRoutes);
+app.use('/scrap', ScrapRoutes);
 
 /**
  * Adds the Config routes
  */
- app.use('/config', ConfigRoutes);
+app.use('/config', ConfigRoutes);

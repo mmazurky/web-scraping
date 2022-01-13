@@ -1,7 +1,5 @@
 import bodyParser from 'body-parser';
-import {
-  getEnvProperty
-} from "./properties-utilities.js";
+import { getEnvProperty } from "./properties-utilities.js";
 import { connect } from 'ngrok';
 
 class TestServerUtilities {

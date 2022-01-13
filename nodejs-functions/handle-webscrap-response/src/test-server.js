@@ -32,9 +32,9 @@ app.listen(serverPort, (err) => {
 /**
  * Adds the Result routes
  */
- app.use('/result', ResultRoutes);
+app.use('/result', ResultRoutes);
 
 /**
  * Adds the Config routes
  */
- app.use('/config', ConfigRoutes);
+app.use('/config', ConfigRoutes);

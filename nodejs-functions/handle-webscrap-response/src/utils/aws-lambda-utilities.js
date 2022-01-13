@@ -14,7 +14,7 @@ class AwsLambdaUtilities {
         // executes the callback
         callback(null, JSON.stringify(response));
     };
-    
+
     /**
      * Retrieves the scraping config value
      * received from webscraper in AWS Lambda

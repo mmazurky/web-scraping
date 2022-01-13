@@ -5,7 +5,7 @@ let router = Router();
 /**
  * http route: receives the scrap result from webscraper
  */
- router.post("/", (req, res) => {
+router.post("/", (req, res) => {
     console.log("> Webscraper finished the scrap! " + JSON.stringify(req.body));
     //answers to webscraper
     res.send({
