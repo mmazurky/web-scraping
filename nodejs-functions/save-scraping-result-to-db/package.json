@@ -2,6 +2,7 @@
   "name": "save-scraping-result-to-db",
   "version": "1.0.0",
   "description": "",
+  "type":"module",
   "main": "src/app.js",
   "author": "Marcelo Mazurky",
   "license": "ISC",

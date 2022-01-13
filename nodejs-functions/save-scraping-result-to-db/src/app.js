@@ -9,7 +9,7 @@ function saveScrapingResultToDB(scrapingData, dbHost, dbUser, dbPassword, dbName
     return new DatabaseController().saveScrapingResultToDB(scrapingData, dbHost, dbUser, dbPassword, dbName, dbClient);
 }
 
-module.exports = {
+export {
     awsLambdaHandler,
     saveScrapingResultToDB
 }
