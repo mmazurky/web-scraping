@@ -1,11 +1,11 @@
 {
   "name": "create-scraping-job-request",
   "version": "1.0.0",
-  "description": "",
+  "description": "Creates a Scraping Job request to Webscraper",
+  "type": "module",
   "main": "src/app.js",
   "author": "Marcelo Mazurky",
   "license": "ISC",
-  "type": "module",
   "dependencies": {
     "axios": "^0.24.0",
     "path": "^0.12.7",

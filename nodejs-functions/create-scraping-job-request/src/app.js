@@ -9,7 +9,7 @@ function createScrapingJob(sitemapId, webscraperToken) {
     return new WebscraperController().createScrapingJob(sitemapId, webscraperToken);
 }
 
-module.exports = {
+export {
     awsLambdaHandler,
     createScrapingJob
 }
