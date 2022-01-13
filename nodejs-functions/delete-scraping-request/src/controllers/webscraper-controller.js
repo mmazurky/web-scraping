@@ -16,9 +16,9 @@ class WebscraperController {
             let sitemapDeletePath = "https://api.webscraper.io/api/v1/sitemap/" + sitemapId + "?api_token=" + webscraperToken;
     
             // deletes the scraping job
-            return callDeleteAPI(scrapingJobDeletePath).then(function () {
+            return this.callDeleteAPI(scrapingJobDeletePath).then(function () {
                 // deletes the sitemap
-                callDeleteAPI(sitemapDeletePath).then(() => {
+                this.callDeleteAPI(sitemapDeletePath).then(() => {
                     resolve(true);
                 }).catch(function (e) {
                     reject(e);
@@ -38,7 +38,7 @@ class WebscraperController {
         // sends the delete request via webscrapper API
         return new Promise((resolve, reject) => {
             axios.delete(url).then(res => {
-                let result = JSON.parse(res);
+                let result = JSON.parse(res.data);
     
                 if (result.success) {
                     resolve(res);

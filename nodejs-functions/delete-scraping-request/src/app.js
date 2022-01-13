@@ -9,7 +9,7 @@ function deleteScraping(scrapingJobId, sitemapId, webscraperToken) {
     return new WebscraperController().deleteScraping(scrapingJobId, sitemapId, webscraperToken);
 }
 
-module.exports = {
+export {
     awsLambdaHandler,
     deleteScraping
 }
