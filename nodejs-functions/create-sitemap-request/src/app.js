@@ -9,7 +9,7 @@ function createSitemap(url, selector, webscraperToken) {
     return new WebscraperController().createSitemap(url, selector, webscraperToken);
 }
 
-module.exports = {
+export {
     awsLambdaHandler,
     createSitemap
 }

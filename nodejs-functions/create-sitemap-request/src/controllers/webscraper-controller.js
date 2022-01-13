@@ -14,9 +14,9 @@ class WebscraperController {
         return new Promise((resolve, reject) => {
             try {
                 //gets the sitemaps from the requested page
-                getSitemaps(url).then(sitemapArray => {
+                this.getSitemaps(url).then(sitemapArray => {
                     //creates a sitemap in webscraper
-                    createSiteMap(url, sitemapArray, selector, webscraperToken).then(sitemapId => {
+                    this.createSitemapRequest(url, sitemapArray, selector, webscraperToken).then(sitemapId => {
                         resolve(sitemapId);
                     }).catch(e => {
                         reject(e);
@@ -37,13 +37,13 @@ class WebscraperController {
         return new Promise((resolve, reject) => {
             try {
                 // tries to get the sitemaps files from the robots.txt file
-                retrieveSitemapsFromRobot(url).then(sitemapArray => {
+                this.retrieveSitemapsFromRobot(url).then(sitemapArray => {
                     // if the sitemap files exists in it, uses them, otherwise uses the default sitemap.xml paths
                     if (sitemapArray && sitemapArray.length > 0) {
                         resolve(sitemapArray);
                     } else {
                         //tries to get the sitemaps from the default paths
-                        retrieveSitemapsFromDefaultPaths(url).then(sitemapArray => {
+                        this.retrieveSitemapsFromDefaultPaths(url).then(sitemapArray => {
                             resolve(sitemapArray);
                         }).catch(e => reject(e));
                     }
@@ -56,14 +56,14 @@ class WebscraperController {
     }
 
     /**
-     * Creates a sitemap in webscraper
+     * Creates a sitemap request in webscraper
      * @param {string} url 
      * @param {array} sitemapArray 
      * @param {string} selector 
      * @param {string} webscraperToken 
      * @returns 
      */
-    createSiteMap(url, sitemapArray, selector, webscraperToken) {
+     createSitemapRequest(url, sitemapArray, selector, webscraperToken) {
         return new Promise((resolve, reject) => {
             try {
                 let selectors = [];
@@ -75,36 +75,34 @@ class WebscraperController {
                 console.log("> Adding selectors to the request")
                 if (sitemapArray && sitemapArray.length > 0) {
                     console.log("-Sitemap files were found - adding sitemap selector");
-                    selectors.push(retrieveSelectorSitemapXmlLink(sitemapArray));
+                    selectors.push(this.retrieveSelectorSitemapXmlLink(sitemapArray));
                 } else {
                     console.log("-No sitemap files were found - only the request page will be scraped");
                 }
                 console.log("-Adding custom text selector with the " + (selector ? selector : "h2") + " element to the request");
-                selectors.push(retrieveCustomSelectorText(selector, sitemapArray));
+                selectors.push(this.retrieveCustomSelectorText(selector, sitemapArray));
 
                 console.log("-Selectors added: " + JSON.stringify(selectors));
 
-                let body = JSON.stringify({
+                let body = {
                     "_id": uniqueid,
                     "startUrl": [
-                        url
+                        urlAux.protocol + "//" + urlAux.host + (urlAux.pathname ? urlAux.pathname : "/")
                     ],
                     "selectors": selectors
-                });
+                };
 
-                console.log(body);
+                console.log(JSON.stringify(body));
 
                 // Sends the request
                 axios.post("https://api.webscraper.io/api/v1/sitemap?api_token=" + webscraperToken, body).then(res => {
-                    let resObj = JSON.parse(res);
-
-                    if (resObj && resObj.data && resObj.data.id) {
-                        resolve(resObj.data.id);
+                    if (res && res.data && res.data.data && res.data.data.id) {
+                        resolve(res.data.data.id);
                     } else {
-                        reject(res);
+                        reject(res.data ? JSON.stringify(res.data) : res);
                     }
                 }).catch(e => {
-                    reject(e);
+                    reject(e.response && e.response.data ? JSON.stringify(e.response.data) : e.response ? JSON.stringify(e.response) : e);
                 });
             } catch (error) {
                 reject(error);
@@ -120,26 +118,47 @@ class WebscraperController {
     retrieveSitemapsFromRobot(url) {
         return new Promise((resolve, reject) => {
             try {
-                console.log("> Searching for sitemaps in robots.txt");
-                let urlAux = new URL(url);
+                console.log("> Searching for sitemaps in robots.txt");       
                 let sitemapArray = [];
+                
+                // formats the robots' file path
+                let urlAux = new URL(url);
+                let robotsFilePath = urlAux.protocol + "//" + urlAux.host + urlAux.pathname + "robots.txt";
 
-                //sends the request
-                axios.get(url.protocol + "//" + url.host + urlAux.pathname + "/robots.txt").then(res => {
-                    let splitted = res.split(/\r?\n/);
-                    for (let i = 0; i < splitted.length; i++) {
-                        if (splitted[i].includes("Sitemap:")) {
-                            sitemapArray.push(splitted[i].replace("Sitemap:", "").replace(/\s/g, ""));
-                        }
-                    }
-
+                // defines the callback functions
+                let successCallback = function() {
                     console.log(sitemapArray.length > 0 ? "-Sitemaps found in robot.xml: " + sitemapArray : "-Sitemaps not found in robots.txt");
                     resolve(sitemapArray);
-                }).catch(e => {
-                    reject(e);
-                })
+                }
+                let errorCallback = function(e) {
+                    console.log("Error: " + e);
+                    resolve(sitemapArray);
+                }
+                
+                // checks if robots.txt file exists
+                urlExist(robotsFilePath).then(exists => {
+                    if (exists) {
+                        // search for sitemaps in robots.txt
+                        axios.get(robotsFilePath).then(res => {
+                            // splits robots.txt value for break line
+                            let splitted = res.data.split(/\r?\n/);
+                            for (let i = 0; i < splitted.length; i++) {
+                                if (splitted[i].includes("Sitemap:")) {
+                                    // if sitemap information is present, adds its value to the array
+                                    sitemapArray.push(splitted[i].replace("Sitemap:", "").replace(/\s/g, ""));
+                                }
+                            }
+                            successCallback();                  
+                        }).catch(e => {
+                            errorCallback(e);
+                        })
+                    } else {
+                        // robots.txt file not found - in this case, continues the process to find the sitemaps in other places
+                        successCallback();
+                    }
+                }).catch(e => console.log("An error has occurred: " + e));               
             } catch (e) {
-                reject(e);
+                errorCallback(e);
             }
         });
     }
@@ -190,10 +209,10 @@ class WebscraperController {
     retrieveSitemapsFromDefaultPaths(urlToScrap) {
         return new Promise((resolve, reject) => {
             let sitemapArray = [];
-            let promises = retrieveDefaultSitemapFilesLocation(urlToScrap).map(url => urlExist(url).then(response => {
-                let jsonResponse = JSON.parse(response);
-                if (jsonResponse.exists) {
-                    sitemapArray.push(jsonResponse.url);
+
+            let promises = this.retrieveDefaultSitemapFilesLocation(urlToScrap).map(url => urlExist(url).then(exists => {
+                if (exists) {
+                    sitemapArray.push(url);
                 }
             }));
             Promise.all(promises).then(results => {
