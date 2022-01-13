@@ -1,12 +1,12 @@
 //initializes the libraries
-import { getProperty } from "./utils/properties-utilities.js";
+import { getEnvProperty } from "./utils/properties-utilities.js";
 import { configExpress, validateWebscraperToken } from "./utils/test-server-utilities.js";
 import ConfigRoutes from "./routes/config-routes.js"
 import ScrapRoutes from "./routes/scrap-routes.js"
 import express from 'express';
 
 // defines the server port
-let serverPort = getProperty("server", "port");
+let serverPort = getEnvProperty("TEST_SERVER_PORT");
 
 // initializes the express
 let app = express();

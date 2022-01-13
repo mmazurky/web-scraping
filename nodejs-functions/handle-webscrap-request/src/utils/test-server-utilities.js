@@ -1,4 +1,3 @@
-import { getProperty } from "./properties-utilities.js";
 import bodyParser from 'body-parser';
 import { getEnvProperty } from "./properties-utilities.js";
 
@@ -30,7 +29,7 @@ class TestServerUtilities {
      */
     static generateScrapHtml() {
         //retrieves the selector from properties file
-        let selector = getProperty("webscraper", "selector");
+        let selector = getEnvProperty("TEST_SERVER_SELECTOR");
 
         return `
       <!DOCTYPE html>

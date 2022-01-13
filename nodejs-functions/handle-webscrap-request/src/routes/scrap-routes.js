@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { sendScrapingRequest } from "../app.js";
-import { setProperty, getEnvProperty } from "../utils/properties-utilities.js";
+import { getEnvProperty, setEnvProperty } from "../utils/properties-utilities.js";
 import { generateScrapHtml } from '../utils/test-server-utilities.js'
 let router = Router();
 
@@ -36,7 +36,7 @@ router.post("/", (req, res) => {
     });
 
     //saves the selector value to properties file
-    setProperty("webscraper", "selector", req.body.selector).then(() => {}).catch(e => {});
+    setEnvProperty("TEST_SERVER_SELECTOR", req.body.selector).then(() => {}).catch(e => {});
 });
 
 export default router;
