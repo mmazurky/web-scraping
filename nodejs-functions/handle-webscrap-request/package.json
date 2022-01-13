@@ -1,16 +1,24 @@
 {
   "name": "handle-webscrap-request",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Handles all the process to create a site scraping request to webscraper",
+  "type": "module",
+  "main": "./src/app.js",
   "author": "Marcelo Mazurky",
   "license": "ISC",
+  "scripts": {
+    "test-server": "node src/test-server.js"
+  },
   "dependencies": {
     "aws-sdk": "^2.1048.0",
+    "axios": "^0.24.0",
     "body-parser": "^1.19.1",
+    "create-scraping-job-request": "file:../create-scraping-job-request",
+    "create-sitemap-request": "file:../create-sitemap-request",
     "cross-fetch": "^3.1.4",
     "express": "^4.17.2",
+    "jest": "^27.4.7",
+    "path": "^0.12.7",
     "properties-reader": "^2.2.0"
-  },
-  "bin": "app.js"
+  }
 }
