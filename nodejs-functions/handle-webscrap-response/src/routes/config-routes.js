@@ -21,13 +21,13 @@ router.post("/", (req, res) => {
 
     if (configIsValid) {
         //check if ng's token was updated, to reconnect (if it did)
-        let ngtokenUpdated = getEnvProperty("NGROK_TOKEN") != req.body.ngrokToken;
+        let ngtokenUpdated = getEnvProperty("TEST_SERVER_NGROK_TOKEN") != req.body.ngrokToken;
 
         //saves all the config values to its properties files
         let saveConfigToProperties = async () => {
             try {
                 await setEnvProperty("WEBSCRAPER_TOKEN", req.body.webscraperToken);
-                await setEnvProperty("NGROK_TOKEN", req.body.ngrokToken);
+                await setEnvProperty("TEST_SERVER_NGROK_TOKEN", req.body.ngrokToken);
 
                 //response
                 res.send({

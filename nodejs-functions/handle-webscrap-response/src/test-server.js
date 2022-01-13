@@ -23,7 +23,7 @@ app.listen(serverPort, (err) => {
     //validates if the ng's token is filled in properties file
     if (validateNgrokToken()) {
         //connects to ngrok to get a public url
-        connectToNgrok(getEnvProperty("NGROK_TOKEN"), getEnvProperty("TEST_SERVER_PORT")).then(() => {}).catch(e => {});
+        connectToNgrok(getEnvProperty("TEST_SERVER_NGROK_TOKEN"), getEnvProperty("TEST_SERVER_PORT")).then(() => {}).catch(e => {});
     } else {
         console.log("> Access http://localhost:" + serverPort + "/config" + " to set the config info");
     }

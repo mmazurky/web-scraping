@@ -25,7 +25,7 @@ class TestServerUtilities {
   static generateConfigHtml() {
     //retrieves each property from its properties file
     let webscraperToken = getEnvProperty("WEBSCRAPER_TOKEN")
-    let ngrokToken = getEnvProperty("NGROK_TOKEN");
+    let ngrokToken = getEnvProperty("TEST_SERVER_NGROK_TOKEN");
 
     return `
       <!DOCTYPE html>
@@ -99,7 +99,7 @@ class TestServerUtilities {
    * @returns 
    */
   static validateNgrokToken() {
-    return getEnvProperty("NGROK_TOKEN") != '';
+    return getEnvProperty("TEST_SERVER_NGROK_TOKEN") != '';
   }
 }
 
