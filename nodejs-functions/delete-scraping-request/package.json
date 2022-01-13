@@ -1,7 +1,7 @@
 {
   "name": "delete-scraping-request",
   "version": "1.0.0",
-  "description": "",
+  "description": "Deletes a Scraping request in Webscraper",
   "main": "src/app.js",
   "author": "Marcelo Mazurky",
   "license": "ISC",

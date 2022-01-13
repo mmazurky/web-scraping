@@ -1,7 +1,7 @@
 {
   "name": "handle-webscrap-response",
   "version": "1.0.0",
-  "description": "",
+  "description": "Handles the scraping result from webscraper",
   "type": "module",
   "main": "src/app.js",
   "author": "Marcelo Mazurky",

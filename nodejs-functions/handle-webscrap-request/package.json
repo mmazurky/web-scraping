@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Handles all the process to create a site scraping request to webscraper",
   "type": "module",
-  "main": "./src/app.js",
+  "main": "src/app.js",
   "author": "Marcelo Mazurky",
   "license": "ISC",
   "scripts": {
