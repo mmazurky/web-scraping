@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getProperty, setEnvProperty, setProperty } from "../utils/properties-utilities.js";
+import { setEnvProperty, getEnvProperty } from "../utils/properties-utilities.js";
 import { generateConfigHtml, validateConfig, connectToNgrok } from '../utils/test-server-utilities.js'
 let router = Router();
 
@@ -21,18 +21,13 @@ router.post("/", (req, res) => {
 
     if (configIsValid) {
         //check if ng's token was updated, to reconnect (if it did)
-        let ngtokenUpdated = getProperty("ngrok", "token") != req.body.ngrokToken;
+        let ngtokenUpdated = getEnvProperty("NGROK_TOKEN") != req.body.ngrokToken;
 
         //saves all the config values to its properties files
         let saveConfigToProperties = async () => {
             try {
                 await setEnvProperty("WEBSCRAPER_TOKEN", req.body.webscraperToken);
-                await setProperty("database", "name", req.body.dbName);
-                await setProperty("database", "host", req.body.dbHost);
-                await setProperty("database", "client", req.body.dbClient);
-                await setProperty("database", "username", req.body.dbUser);
-                await setProperty("database", "password", req.body.dbPassword);
-                await setProperty("ngrok", "token", req.body.ngrokToken);
+                await setEnvProperty("NGROK_TOKEN", req.body.ngrokToken);
 
                 //response
                 res.send({
@@ -50,9 +45,9 @@ router.post("/", (req, res) => {
 
         //if the ng's token was updated, reconnects to it
         if (ngtokenUpdated) {
-            connectToNgrok(req.body.ngrokToken, getProperty("server", "port")).then(() => {}).catch(e => {
+            connectToNgrok(req.body.ngrokToken, getEnvProperty("TEST_SERVER_PORT")).then(() => {}).catch(e => {
                 console.log("Error: " + e);
-                console.log("> Failed to connect to ngrok! Access http://localhost:" + serverPort + "/config" + " to set the config info");
+                console.log("> Failed to connect to ngrok! Access http://localhost:" + getEnvProperty("TEST_SERVER_PORT") + "/config" + " to set the config info");
             });
         }
     } else {

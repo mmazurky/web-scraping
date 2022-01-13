@@ -1,6 +1,6 @@
 //initializes the libraries
 import https from 'https';
-import { getProperty, getEnvProperty } from '../utils/properties-utilities.js';
+import { getEnvProperty } from '../utils/properties-utilities.js';
 import { saveScrapingResultToDB } from 'save-scraping-result-to-db';
 import { deleteScraping } from 'delete-scraping-request';
 
@@ -49,15 +49,10 @@ class WebscraperController {
                 console.log("----------------- RETRIEVING THE SCRAP RESULT FROM WEBSCRAPER -----------------");
                 return retrieveScrapingResult(scrapingJobId, webscraperToken).then(scrapingResult => {
                     console.log("-Result retrieved with success!");
-                    let dbClient = getProperty("database", "client");
-                    let dbName = getProperty("database", "name");
-                    let dbHost = getProperty("database", "host");
-                    let dbUser = getProperty("database", "username");
-                    let dbPassword = getProperty("database", "password");
 
                     // saves the scraping result to DB
                     console.log("----------------- SAVING RESULT TO THE DATABASE -----------------");
-                    saveScrapingResultToDB(scrapingResult, dbHost, dbUser, dbPassword, dbName, dbClient).then(() => {
+                    saveScrapingResultToDB(scrapingResult).then(() => {
                         console.log("-Inserted in DB with success!");
                         // deletes the scraping request
                         console.log("----------------- DELETING THE SCRAP REQUEST FROM WEBSCRAPER -----------------");

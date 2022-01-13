@@ -1,12 +1,12 @@
 //initializes the libraries
-import { getProperty } from "./utils/properties-utilities.js";
+import { getEnvProperty } from "./utils/properties-utilities.js";
 import { configExpress, connectToNgrok, validateNgrokToken } from "./utils/test-server-utilities.js";
 import ConfigRoutes from "./routes/config-routes.js"
 import ResultRoutes from "./routes/result-routes.js"
 import express from 'express';
 
 // defines the server port
-let serverPort = getProperty("server", "port");
+let serverPort = getEnvProperty("TEST_SERVER_PORT");
 
 // initializes the express
 let app = express();
@@ -23,7 +23,7 @@ app.listen(serverPort, (err) => {
     //validates if the ng's token is filled in properties file
     if (validateNgrokToken()) {
         //connects to ngrok to get a public url
-        connectToNgrok(getProperty("ngrok", "token"), getProperty("server", "port")).then(() => {}).catch(e => {});
+        connectToNgrok(getEnvProperty("NGROK_TOKEN"), getEnvProperty("TEST_SERVER_PORT")).then(() => {}).catch(e => {});
     } else {
         console.log("> Access http://localhost:" + serverPort + "/config" + " to set the config info");
     }
