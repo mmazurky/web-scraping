@@ -2,13 +2,17 @@
   "name": "handle-webscrap-response",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "type": "module",
+  "main": "src/app.js",
   "author": "Marcelo Mazurky",
   "license": "ISC",
+  "scripts": {
+    "test-server": "node src/test-server.js"
+  },
   "dependencies": {
-    "-": "^0.0.1",
     "aws-sdk": "^2.1050.0",
     "body-parser": "^1.19.1",
+    "delete-scraping-request": "file:../delete-scraping-request",
     "express": "^4.17.2",
     "g": "^2.0.1",
     "https": "^1.0.0",
@@ -16,6 +20,7 @@
     "mysql2": "^2.3.3",
     "ngrok": "^4.2.2",
     "npm": "^8.3.0",
-    "properties-reader": "^2.2.0"
+    "properties-reader": "^2.2.0",
+    "save-scraping-result-to-db": "file:../save-scraping-result-to-db"
   }
 }
