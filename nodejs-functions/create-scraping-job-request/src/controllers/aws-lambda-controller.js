@@ -1,6 +1,5 @@
 import { WebscraperController } from './webscraper-controller.js';
 import { executeCallback } from "../utils/aws-lambda-utilities.js"
-import { getEnvProperty } from '../utils/properties-utilities.js'
 
 class AwsLambdaController {
     /**
@@ -15,11 +14,8 @@ class AwsLambdaController {
             //instantiates the controller
             let webscraperController = new WebscraperController();
 
-            // webscraper's token (configured as environment variable)
-            let webscraperToken = getEnvProperty('WEBSCRAPER_TOKEN');
-
             // creates the scraping request
-            webscraperController.createScrapingJob(event.sitemapId, webscraperToken).then(() => {
+            webscraperController.createScrapingJob(event.sitemapId, event.webscraperToken).then(() => {
                 console.log("Finished with success!");
                 // returns the request status
                 executeCallback(null, callback);

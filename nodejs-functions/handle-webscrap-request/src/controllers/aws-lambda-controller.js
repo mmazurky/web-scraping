@@ -1,5 +1,6 @@
 import AWS from 'aws-sdk';
-import { getBodyJson, getJsonPayload, executeSuccessCallback, executeErrorCallback } from "../utils/aws-lambda-utilities.js"
+import { getBodyJson, getJsonPayload, executeSuccessCallback, executeErrorCallback } from "../utils/aws-lambda-utilities.js";
+import { getEnvProperty } from "../utils/properties-utilities.js"
 
 class AwsLambdaController {
     constructor() {
@@ -21,13 +22,22 @@ class AwsLambdaController {
                 //retrieves the url value (tries to get in the request's body or in request's parameters)
                 "url": event.url && event.url != null ? event.url : body != null && body.url ? body.url : null,
                 //retrieves the selector value (tries to get in the request's body or in request's parameters)
-                "selector": event.selector && event.selector != null ? event.selector : body != null && body.selector ? body.selector : null
+                "selector": event.selector && event.selector != null ? event.selector : body != null && body.selector ? body.selector : null,
+                //retrieves the webscraper token from environment
+                "webscraperToken": getEnvProperty("WEBSCRAPER_TOKEN")
             };
 
             //calls the lambda function to create the sitemap
             this.callLambdaFunction('create-sitemap-request', createSitemapRequest).then(payload => {
+                // mounts the create scraping job's request
+                let createScrapingJobRequest = {
+                    "sitemapId": getJsonPayload(payload).sitemapId,
+                    //retrieves the webscraper token from environment
+                    "webscraperToken": getEnvProperty("WEBSCRAPER_TOKEN")
+                };
+
                 //calls the lambda function to create the scraping job
-                this.callLambdaFunction('create-scraping-job-request', { "sitemapId": getJsonPayload(payload).sitemapId }).then(() => {
+                this.callLambdaFunction('create-scraping-job-request', createScrapingJobRequest).then(() => {
                     //executes the success callback
                     executeSuccessCallback(context);
                 }).catch(error => {

@@ -1,12 +1,20 @@
 //initializes the libraries
-import { executeSuccessCallback, executeErrorCallback } from "../utils/aws-lambda-utilities.js";
-import { WebscraperController } from "./webscraper-controller.js";
+import {
+    deleteScraping
+} from "delete-scraping-request";
+import {
+    executeSuccessCallback,
+    executeErrorCallback
+} from "../utils/aws-lambda-utilities.js";
+import {
+    WebscraperController
+} from "./webscraper-controller.js";
 
 class AwsLambdaController {
     constructor() {
         this.lambda = new AWS.Lambda();
     }
-    
+
     /**
      * Handler method used by AWS Lambda
      * @param {string} event 
@@ -46,11 +54,16 @@ class AwsLambdaController {
                 return webscraperController.retrieveScrapingResult(scrapingJobId, webscraperToken).then(scrapingResult => {
                     // saves the scraping result to DB
                     this.callLambdaFunction('save-scraping-result-to-db', scrapingResult).then(() => {
-                        // deletes the scraping request
-                        this.callLambdaFunction('delete-scraping-request', {
+                        // mounts the delete scraping's request
+                        let deleteScrapingRequest = {
                             "scrapingJobId": scrapingJobId,
-                            "sitemapId": sitemapId
-                        }).then(() => {
+                            "sitemapId": sitemapId,
+                            //retrieves the webscraper token from environment
+                            "webscraperToken": getEnvProperty("WEBSCRAPER_TOKEN")
+                        };
+
+                        // deletes the scraping request
+                        this.callLambdaFunction('delete-scraping-request', deleteScrapingRequest).then(() => {
                             resolve(true);
                         }).catch(e => {
                             reject(e);
@@ -73,7 +86,7 @@ class AwsLambdaController {
      * @param {string} payload 
      * @returns 
      */
-     callLambdaFunction(functionName, payload) {
+    callLambdaFunction(functionName, payload) {
         return new Promise((resolve, reject) => {
             //defines the parameters
             var params = {
@@ -101,7 +114,7 @@ class AwsLambdaController {
             });
         });
     };
-    
+
 }
 
 export {
