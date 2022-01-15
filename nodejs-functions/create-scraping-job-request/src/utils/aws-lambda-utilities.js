@@ -1,19 +1,28 @@
 class AwsLambdaUtilities {
     /**
-     * Execute the callback for the AWS Lambda function
-     * @param {error} error 
-     * @param {*} callback 
+     * Retrieves Lambda success response
+     * @returns 
      */
-    static executeCallback(error, callback) {
-        // mounts the JSON response
-        let response = {
-            status: !error ? 200 : 400,
-            success: !error
+    static retrieveLambdaSuccessResponse() {
+        return {
+            status: 200,
+            success: true
         };
+    }
 
-        // executes the callback
-        callback(null, JSON.stringify(response));
-    };
+    /**
+     * Retrieves Lambda error response
+     * @param {*} error 
+     * @returns 
+     */
+    static retrieveLambdaErrorResponse(error) {
+        return {
+            status: 400,
+            success: false,
+            reason: error && error.message ? error.message : typeof error === 'object' ? JSON.stringify(error) : error
+        };
+    }
 }
 
-export const executeCallback = AwsLambdaUtilities.executeCallback;
+export const retrieveLambdaSuccessResponse = AwsLambdaUtilities.retrieveLambdaSuccessResponse;
+export const retrieveLambdaErrorResponse = AwsLambdaUtilities.retrieveLambdaErrorResponse;

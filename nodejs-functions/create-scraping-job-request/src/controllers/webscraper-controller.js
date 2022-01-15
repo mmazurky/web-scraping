@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { WEBSCRAPER_HOST, CREATE_SCRAPING_JOB_PATH, INVALID_CREATE_SCRAPING_JOB_REQUEST_MESSAGE } from '../utils/webscraper-constants.js';
 
 class WebscraperController {
     /**
@@ -10,8 +11,11 @@ class WebscraperController {
     createScrapingJob(sitemapId, webscraperToken) {
         return new Promise((resolve, reject) => {
             try {
+                //validates the fields
+                this.validateCreateScrapingJobRequest(sitemapId, webscraperToken);
+
                 //sends the request
-                axios.post("https://api.webscraper.io/api/v1/scraping-job?api_token=" + webscraperToken, {
+                axios.post(WEBSCRAPER_HOST + CREATE_SCRAPING_JOB_PATH + "?api_token=" +  webscraperToken, {
                     "sitemap_id": sitemapId,
                     "driver": "fast", // "fast" or "fulljs"
                     "page_load_delay": 2000,
@@ -25,12 +29,24 @@ class WebscraperController {
                         reject(res.data);
                     }
                 }).catch(e => {
-                    reject(e.response && e.response.data ? JSON.stringify(e.response.data) : e.response ? JSON.stringify(e.response) : e);
+                    //status code different than 200
+                    reject(e.response.data);
                 })
             } catch (e) {
                 reject(e);
             }
         });
+    }
+
+    /**
+     * Validates the request to create a scraping job
+     * @param {number} sitemapId 
+     * @param {string} webscraperToken 
+     */
+    validateCreateScrapingJobRequest(sitemapId, webscraperToken) {
+        if (!sitemapId || !webscraperToken) {
+            throw new Error(INVALID_CREATE_SCRAPING_JOB_REQUEST_MESSAGE);
+        }
     }
 }
 
