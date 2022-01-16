@@ -3,8 +3,8 @@ import randomString from 'randomstring';
 import { WebscraperController } from "../../controllers/webscraper-controller.js";
 import { TestUtilities } from "../../utils/test-utilities.js";
 import { retrieveDefaultSitemapFiles } from '../../utils/webscraper-utilities.js'
-import * as TestConstants from "../../utils/test-constants.js";
-import * as WebscraperConstants from '../../utils/webscraper-constants.js';
+import * as TestConstants from "../../constants/test-constants.js";
+import * as WebscraperConstants from '../../constants/webscraper-constants.js';
 
 describe("WebscraperController tests", () => {
     let webscraperController;

@@ -1,10 +1,9 @@
 import { AwsLambdaController } from "../../controllers/aws-lambda-controller.js";
 import { retrieveLambdaErrorResponse, retrieveLambdaSuccessResponse } from "../../utils/aws-lambda-utilities.js";
-import { CREATE_SITEMAP_PATH, INVALID_CREATE_SITEMAP_REQUEST_MESSAGE } from '../../utils/webscraper-constants.js';
+import * as WebscraperConstants from '../../constants/webscraper-constants.js';
 import nock from 'nock';
 import { TestUtilities } from "../../utils/test-utilities.js";
-import * as TestConstants from "../../utils/test-constants.js";
-import * as WebscraperConstants from '../../utils/webscraper-constants.js';
+import * as TestConstants from "../../constants/test-constants.js";
 
 describe("AwsLambdaController tests", () => {
     let awsLambdaController;
@@ -12,7 +11,7 @@ describe("AwsLambdaController tests", () => {
 
     beforeAll(() => {
         // mounts the create sitemap's url path
-        createSitemapUrlPath = CREATE_SITEMAP_PATH + "?api_token=" + TestConstants.RANDOM_WEBSCRAPER_TOKEN
+        createSitemapUrlPath = WebscraperConstants.CREATE_SITEMAP_PATH + "?api_token=" + TestConstants.RANDOM_WEBSCRAPER_TOKEN
     })
 
     beforeEach(() => {
@@ -98,7 +97,7 @@ describe("AwsLambdaController tests", () => {
 
             // sends the request
             await awsLambdaController.handler(invalidFunctionRequest, null).then(result => {
-                let expectedErrorResponse = retrieveLambdaErrorResponse(new Error(INVALID_CREATE_SITEMAP_REQUEST_MESSAGE));
+                let expectedErrorResponse = retrieveLambdaErrorResponse(new Error(WebscraperConstants.INVALID_CREATE_SITEMAP_REQUEST_MESSAGE));
                 expect(result).toEqual(expectedErrorResponse);
             });
         })

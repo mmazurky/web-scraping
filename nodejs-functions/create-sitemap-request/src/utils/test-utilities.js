@@ -1,5 +1,5 @@
-import { RANDOM_WEBSCRAPER_TOKEN } from "./test-constants.js";
-import { CREATE_SITEMAP_PATH } from './webscraper-constants.js';
+import * as TestConstants from "../constants/test-constants.js";
+import * as WebscraperConstants from '../constants/webscraper-constants.js';
 
 class TestUtilities {
     /**
@@ -7,7 +7,7 @@ class TestUtilities {
      * @returns 
      */
     static retrieveCreateSitemapWithTokenPath() {
-        return CREATE_SITEMAP_PATH + "?api_token=" + RANDOM_WEBSCRAPER_TOKEN;
+        return WebscraperConstants.CREATE_SITEMAP_PATH + "?api_token=" + TestConstants.RANDOM_WEBSCRAPER_TOKEN;
     }
 
     /**

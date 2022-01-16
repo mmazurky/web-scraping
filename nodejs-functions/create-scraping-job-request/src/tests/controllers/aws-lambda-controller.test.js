@@ -1,6 +1,6 @@
 import { AwsLambdaController } from "../../controllers/aws-lambda-controller.js";
 import { retrieveLambdaErrorResponse, retrieveLambdaSuccessResponse } from "../../utils/aws-lambda-utilities.js";
-import { WEBSCRAPER_HOST, CREATE_SCRAPING_JOB_PATH, INVALID_CREATE_SCRAPING_JOB_REQUEST_MESSAGE } from '../../utils/webscraper-constants.js';
+import * as WebscraperConstants from '../../constants/webscraper-constants.js';
 import nock from 'nock';
 import randomString from 'randomstring';
 
@@ -13,7 +13,7 @@ describe("AwsLambdaController tests", () => {
         // generates a random token
         webscraperToken = randomString.generate();
         // mounts the create scraping job's url path
-        createScrapingJobUrlPath = CREATE_SCRAPING_JOB_PATH + "?api_token=" + webscraperToken
+        createScrapingJobUrlPath = WebscraperConstants.CREATE_SCRAPING_JOB_PATH + "?api_token=" + webscraperToken
     })
 
     beforeEach(() => {
@@ -43,7 +43,7 @@ describe("AwsLambdaController tests", () => {
             };
 
             // mocks the http error response when the API is called
-            nock(WEBSCRAPER_HOST)
+            nock(WebscraperConstants.WEBSCRAPER_HOST)
                 .persist()
                 .post(createScrapingJobUrlPath)
                 .reply(200, httpSuccessResponse);
@@ -76,7 +76,7 @@ describe("AwsLambdaController tests", () => {
             };
 
             // mocks the http error response when the API is called
-            nock(WEBSCRAPER_HOST)
+            nock(WebscraperConstants.WEBSCRAPER_HOST)
                 .persist()
                 .post(createScrapingJobUrlPath)
                 .reply(400, httpErrorResponse);
@@ -97,7 +97,7 @@ describe("AwsLambdaController tests", () => {
 
             // sends the request
             await awsLambdaController.handler(invalidFunctionRequest, null).then(result => {
-                let expectedErrorResponse = retrieveLambdaErrorResponse(new Error(INVALID_CREATE_SCRAPING_JOB_REQUEST_MESSAGE));
+                let expectedErrorResponse = retrieveLambdaErrorResponse(new Error(WebscraperConstants.INVALID_CREATE_SCRAPING_JOB_REQUEST_MESSAGE));
                 expect(result).toEqual(expectedErrorResponse);
             });
         })

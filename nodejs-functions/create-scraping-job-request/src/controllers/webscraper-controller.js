@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { WEBSCRAPER_HOST, CREATE_SCRAPING_JOB_PATH, INVALID_CREATE_SCRAPING_JOB_REQUEST_MESSAGE } from '../utils/webscraper-constants.js';
+import * as WebscraperConstants from '../constants/webscraper-constants.js';
 
 class WebscraperController {
     /**
@@ -24,7 +24,7 @@ class WebscraperController {
                 };
 
                 //sends the request
-                axios.post(WEBSCRAPER_HOST + CREATE_SCRAPING_JOB_PATH + "?api_token=" +  webscraperToken, body).then(res => {
+                axios.post(WebscraperConstants.WEBSCRAPER_HOST + WebscraperConstants.CREATE_SCRAPING_JOB_PATH + "?api_token=" +  webscraperToken, body).then(res => {
                     //if the scraping job id is present in the response, it was created with success
                     if (res && res.data && res.data.data && res.data.data.id) {
                         resolve(res.data.data.id);
@@ -48,7 +48,7 @@ class WebscraperController {
      */
     validateCreateScrapingJobRequest(sitemapId, webscraperToken) {
         if (!sitemapId || !webscraperToken) {
-            throw new Error(INVALID_CREATE_SCRAPING_JOB_REQUEST_MESSAGE);
+            throw new Error(WebscraperConstants.INVALID_CREATE_SCRAPING_JOB_REQUEST_MESSAGE);
         }
     }
 }

@@ -1,5 +1,5 @@
 import { WebscraperController } from "../../controllers/webscraper-controller.js";
-import { WEBSCRAPER_HOST, CREATE_SCRAPING_JOB_PATH, INVALID_CREATE_SCRAPING_JOB_REQUEST_MESSAGE } from '../../utils/webscraper-constants.js';
+import * as WebscraperConstants from '../../constants/webscraper-constants.js';
 import nock from 'nock';
 import randomString from 'randomstring';
 
@@ -12,7 +12,7 @@ describe("WebscraperController tests", () => {
         // generates a random token
         webscraperToken = randomString.generate();
         // mounts the create scraping job's url path
-        createScrapingJobUrlPath = CREATE_SCRAPING_JOB_PATH + "?api_token=" + webscraperToken
+        createScrapingJobUrlPath = WebscraperConstants.CREATE_SCRAPING_JOB_PATH + "?api_token=" + webscraperToken
     })
 
     beforeEach(() => {
@@ -39,7 +39,7 @@ describe("WebscraperController tests", () => {
             };
 
             // mocks the http response when the API is called
-            nock(WEBSCRAPER_HOST)
+            nock(WebscraperConstants.WEBSCRAPER_HOST)
                 .persist()
                 .post(createScrapingJobUrlPath)
                 .reply(200, httpSuccessResponse);
@@ -60,7 +60,7 @@ describe("WebscraperController tests", () => {
             };
 
             // mocks the http response when the API is called
-            nock(WEBSCRAPER_HOST)
+            nock(WebscraperConstants.WEBSCRAPER_HOST)
                 .persist()
                 .post(createScrapingJobUrlPath)
                 .reply(200, httpSuccessResponseWithoutId);
@@ -78,7 +78,7 @@ describe("WebscraperController tests", () => {
             };
 
             // mocks the http error response when the API is called
-            nock(WEBSCRAPER_HOST)
+            nock(WebscraperConstants.WEBSCRAPER_HOST)
                 .persist()
                 .post(createScrapingJobUrlPath)
                 .reply(400, httpErrorResponse);
@@ -91,7 +91,7 @@ describe("WebscraperController tests", () => {
 
         it("mandatory fields not filled: must reject and return the error", () => {
             // expected error message
-            let errorMessageResponse = INVALID_CREATE_SCRAPING_JOB_REQUEST_MESSAGE;
+            let errorMessageResponse = WebscraperConstants.INVALID_CREATE_SCRAPING_JOB_REQUEST_MESSAGE;
 
             // sends the request
             return webscraperController.createScrapingJob(null, null).catch(error => {
@@ -102,19 +102,19 @@ describe("WebscraperController tests", () => {
 
     describe("validateCreateScrapingJobRequest function tests | validates the request to create a sitemap", () => {
         it("all mandatory fields not filled: must throw a 'invalid create sitemap request' error", () => {
-            let expectedError = new Error(INVALID_CREATE_SCRAPING_JOB_REQUEST_MESSAGE);
+            let expectedError = new Error(WebscraperConstants.INVALID_CREATE_SCRAPING_JOB_REQUEST_MESSAGE);
 
             expect(() => webscraperController.validateCreateScrapingJobRequest(null, null)).toThrow(expectedError);
         })
 
         it("sitemapId field not filled: must throw a 'invalid create sitemap request' error", () => {
-            let expectedError = new Error(INVALID_CREATE_SCRAPING_JOB_REQUEST_MESSAGE);
+            let expectedError = new Error(WebscraperConstants.INVALID_CREATE_SCRAPING_JOB_REQUEST_MESSAGE);
 
             expect(() => webscraperController.validateCreateScrapingJobRequest(null, "webscraperToken")).toThrow(expectedError);
         })
 
         it("webscraperToken field not filled: must throw a 'invalid create sitemap request' error", () => {
-            let expectedError = new Error(INVALID_CREATE_SCRAPING_JOB_REQUEST_MESSAGE);
+            let expectedError = new Error(WebscraperConstants.INVALID_CREATE_SCRAPING_JOB_REQUEST_MESSAGE);
 
             expect(() => webscraperController.validateCreateScrapingJobRequest("sitemapId", null)).toThrow(expectedError);
         })

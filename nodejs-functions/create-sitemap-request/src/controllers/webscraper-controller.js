@@ -1,17 +1,7 @@
 //initializes the libraries
 import axios from 'axios';
 import urlExist from "url-exist";
-import {
-    WEBSCRAPER_HOST,
-    CREATE_SITEMAP_PATH,
-    INVALID_CREATE_SITEMAP_REQUEST_MESSAGE,
-    INITIAL_CUSTOM_SELECTOR_CONFIG,
-    CUSTOM_SELECTOR_SINGLE_PAGE_SELECTORS,
-    CUSTOM_SELECTOR_SITEMAP_SELECTORS,
-    CUSTOM_SELECTOR_DEFAULT_SELECTOR,
-    INITIAL_SELECTOR_SITEMAP_XML_LINK_CONFIG,
-    INITIAL_CREATE_SITEMAP_REQUEST_BODY_CONFIG
-} from '../utils/webscraper-constants.js';
+import * as WebscraperConstants from '../constants/webscraper-constants.js';
 import { retrieveDefaultSitemapFiles, formatURLPath } from '../utils/webscraper-utilities.js'
 
 class WebscraperController {
@@ -82,7 +72,7 @@ class WebscraperController {
                 console.log(JSON.stringify(body));
 
                 // Sends the request
-                axios.post(WEBSCRAPER_HOST + CREATE_SITEMAP_PATH + "?api_token=" + webscraperToken, body).then(res => {
+                axios.post(WebscraperConstants.WEBSCRAPER_HOST + WebscraperConstants.CREATE_SITEMAP_PATH + "?api_token=" + webscraperToken, body).then(res => {
                     //if the scraping job id is present in the response, it was created with success
                     if (res && res.data && res.data.data && res.data.data.id) {
                         resolve(res.data.data.id);
@@ -103,7 +93,7 @@ class WebscraperController {
 
     retrieveCreateSitemapRequestBody(url, sitemapArray, selector) {
         let urlAux = new URL(url);
-        let body = INITIAL_CREATE_SITEMAP_REQUEST_BODY_CONFIG;
+        let body = WebscraperConstants.INITIAL_CREATE_SITEMAP_REQUEST_BODY_CONFIG;
         // generates a uniqueid for the sitemap (it is needed to allow concurrent scrap requests)
         body._id = urlAux.hostname.replace(/\W/g, '-') + "-" + new Date().getTime();
         body.startUrl = formatURLPath(url);
@@ -179,7 +169,7 @@ class WebscraperController {
      * @returns 
      */
     retrieveSelectorSitemapXmlLink(sitemapArray) {
-        let initialSelectorConfig = INITIAL_SELECTOR_SITEMAP_XML_LINK_CONFIG;
+        let initialSelectorConfig = WebscraperConstants.INITIAL_SELECTOR_SITEMAP_XML_LINK_CONFIG;
 
         initialSelectorConfig.sitemapXmlUrls = sitemapArray;
 
@@ -193,10 +183,10 @@ class WebscraperController {
      * @returns 
      */
     retrieveCustomSelectorText(selector, sitemapArray) {
-        let initialSelectorConfig = INITIAL_CUSTOM_SELECTOR_CONFIG;
+        let initialSelectorConfig = WebscraperConstants.INITIAL_CUSTOM_SELECTOR_CONFIG;
 
-        initialSelectorConfig.parentSelectors = [sitemapArray && sitemapArray.length > 0 ? CUSTOM_SELECTOR_SITEMAP_SELECTORS : CUSTOM_SELECTOR_SINGLE_PAGE_SELECTORS];
-        initialSelectorConfig.selector = selector && selector != "" ? selector : CUSTOM_SELECTOR_DEFAULT_SELECTOR;
+        initialSelectorConfig.parentSelectors = [sitemapArray && sitemapArray.length > 0 ? WebscraperConstants.CUSTOM_SELECTOR_SITEMAP_SELECTORS : WebscraperConstants.CUSTOM_SELECTOR_SINGLE_PAGE_SELECTORS];
+        initialSelectorConfig.selector = selector && selector != "" ? selector : WebscraperConstants.CUSTOM_SELECTOR_DEFAULT_SELECTOR;
 
         return initialSelectorConfig;
     }
@@ -251,7 +241,7 @@ class WebscraperController {
      */
     validatesendCreateSitemapRequest(url, selector, webscraperToken) {
         if (!url || !selector || !webscraperToken) {
-            throw new Error(INVALID_CREATE_SITEMAP_REQUEST_MESSAGE);
+            throw new Error(WebscraperConstants.INVALID_CREATE_SITEMAP_REQUEST_MESSAGE);
         }
     }
 }
