@@ -1,6 +1,18 @@
 //initializes the libraries
 import axios from 'axios';
 import urlExist from "url-exist";
+import {
+    WEBSCRAPER_HOST,
+    CREATE_SITEMAP_PATH,
+    INVALID_CREATE_SITEMAP_REQUEST_MESSAGE,
+    INITIAL_CUSTOM_SELECTOR_CONFIG,
+    CUSTOM_SELECTOR_SINGLE_PAGE_SELECTORS,
+    CUSTOM_SELECTOR_SITEMAP_SELECTORS,
+    CUSTOM_SELECTOR_DEFAULT_SELECTOR,
+    INITIAL_SELECTOR_SITEMAP_XML_LINK_CONFIG,
+    INITIAL_CREATE_SITEMAP_REQUEST_BODY_CONFIG
+} from '../utils/webscraper-constants.js';
+import { retrieveDefaultSitemapFiles, formatURLPath } from '../utils/webscraper-utilities.js'
 
 class WebscraperController {
     /**
@@ -13,15 +25,18 @@ class WebscraperController {
     createSitemap(url, selector, webscraperToken) {
         return new Promise((resolve, reject) => {
             try {
+                //validates the fields
+                this.validatesendCreateSitemapRequest(url, selector, webscraperToken);
+
                 //gets the sitemaps from the requested page
                 this.getSitemaps(url).then(sitemapArray => {
                     //creates a sitemap in webscraper
-                    this.createSitemapRequest(url, sitemapArray, selector, webscraperToken).then(sitemapId => {
+                    this.sendCreateSitemapRequest(url, sitemapArray, selector, webscraperToken).then(sitemapId => {
                         resolve(sitemapId);
                     }).catch(e => {
                         reject(e);
                     });
-                }).catch(e => reject(e));
+                });
             } catch (error) {
                 reject(error);
             }
@@ -35,79 +50,74 @@ class WebscraperController {
      */
     getSitemaps(url) {
         return new Promise((resolve, reject) => {
-            try {
-                // tries to get the sitemaps files from the robots.txt file
-                this.retrieveSitemapsFromRobot(url).then(sitemapArray => {
-                    // if the sitemap files exists in it, uses them, otherwise uses the default sitemap.xml paths
-                    if (sitemapArray && sitemapArray.length > 0) {
+            // tries to get the sitemaps files from the robots.txt file
+            this.retrieveSitemapsFromRobot(url).then(sitemapArray => {
+                // if the sitemap files exists in it, uses them, otherwise uses the default sitemap.xml paths
+                if (sitemapArray && sitemapArray.length > 0) {
+                    resolve(sitemapArray);
+                } else {
+                    //tries to get the sitemaps from the default paths
+                    this.retrieveAvailableSitemapsFromDefaultPaths(url).then(sitemapArray => {
                         resolve(sitemapArray);
-                    } else {
-                        //tries to get the sitemaps from the default paths
-                        this.retrieveSitemapsFromDefaultPaths(url).then(sitemapArray => {
-                            resolve(sitemapArray);
-                        }).catch(e => reject(e));
-                    }
-                }).catch(e => reject(e));
-            } catch (error) {
-                reject(error);
-            }
+                    });
+                }
+            })
         });
 
     }
 
     /**
-     * Creates a sitemap request in webscraper
+     * Sends a sitemap request to webscraper
      * @param {string} url 
      * @param {array} sitemapArray 
      * @param {string} selector 
      * @param {string} webscraperToken 
      * @returns 
      */
-    createSitemapRequest(url, sitemapArray, selector, webscraperToken) {
+    sendCreateSitemapRequest(url, sitemapArray, selector, webscraperToken) {
         return new Promise((resolve, reject) => {
             try {
-                let selectors = [];
-
-                // generates a uniqueid for the sitemap (it is needed to allow concurrent scrap requests)
-                let urlAux = new URL(url);
-                let uniqueid = urlAux.hostname.replace(/\W/g, '-') + "-" + new Date().getTime();
-
-                console.log("> Adding selectors to the request")
-                if (sitemapArray && sitemapArray.length > 0) {
-                    console.log("-Sitemap files were found - adding sitemap selector");
-                    selectors.push(this.retrieveSelectorSitemapXmlLink(sitemapArray));
-                } else {
-                    console.log("-No sitemap files were found - only the request page will be scraped");
-                }
-                console.log("-Adding custom text selector with the " + (selector ? selector : "h2") + " element to the request");
-                selectors.push(this.retrieveCustomSelectorText(selector, sitemapArray));
-
-                console.log("-Selectors added: " + JSON.stringify(selectors));
-
-                let body = {
-                    "_id": uniqueid,
-                    "startUrl": [
-                        urlAux.protocol + "//" + urlAux.host + (urlAux.pathname ? urlAux.pathname : "/")
-                    ],
-                    "selectors": selectors
-                };
+                let body = this.retrieveCreateSitemapRequestBody(url, sitemapArray, selector);
 
                 console.log(JSON.stringify(body));
 
                 // Sends the request
-                axios.post("https://api.webscraper.io/api/v1/sitemap?api_token=" + webscraperToken, body).then(res => {
+                axios.post(WEBSCRAPER_HOST + CREATE_SITEMAP_PATH + "?api_token=" + webscraperToken, body).then(res => {
+                    //if the scraping job id is present in the response, it was created with success
                     if (res && res.data && res.data.data && res.data.data.id) {
                         resolve(res.data.data.id);
                     } else {
-                        reject(res.data ? JSON.stringify(res.data) : res);
+                        reject(res.data);
                     }
                 }).catch(e => {
-                    reject(e.response && e.response.data ? JSON.stringify(e.response.data) : e.response ? JSON.stringify(e.response) : e);
+                    console.log("Exception: " + e);
+                    //status code different than 200
+                    reject(e.response.data);
                 });
-            } catch (error) {
-                reject(error);
+            } catch (e) {
+                console.log("Exception: " + e);
+                reject(e);
             }
         });
+    }
+
+    retrieveCreateSitemapRequestBody(url, sitemapArray, selector) {
+        let urlAux = new URL(url);
+        let body = INITIAL_CREATE_SITEMAP_REQUEST_BODY_CONFIG;
+        // generates a uniqueid for the sitemap (it is needed to allow concurrent scrap requests)
+        body._id = urlAux.hostname.replace(/\W/g, '-') + "-" + new Date().getTime();
+        body.startUrl = formatURLPath(url);
+        console.log("> Adding selectors to the request")
+        if (sitemapArray && sitemapArray.length > 0) {
+            console.log("-Sitemap files were found - adding sitemap selector");
+            body.selectors.push(this.retrieveSelectorSitemapXmlLink(sitemapArray));
+        } else {
+            console.log("-No sitemap files were found - only the request page will be scraped");
+        }
+        //console.log("-Adding custom text selector with the " + (selector ? selector : "h2") + " element to the request");
+        body.selectors.push(this.retrieveCustomSelectorText(selector, sitemapArray));
+
+        return body;
     }
 
     /**
@@ -117,23 +127,23 @@ class WebscraperController {
      */
     retrieveSitemapsFromRobot(url) {
         return new Promise((resolve, reject) => {
+            let sitemapArray = [];
+
+            // defines the callback functions
+            let successCallback = function () {
+                console.log(sitemapArray.length > 0 ? "-Sitemaps found in robot.xml: " + sitemapArray : "-Sitemaps not found in robots.txt");
+                resolve(sitemapArray);
+            }
+            let errorCallback = function (e) {
+                console.log("Error: " + e);
+                resolve(sitemapArray);
+            }
             try {
                 console.log("> Searching for sitemaps in robots.txt");
-                let sitemapArray = [];
 
                 // formats the robots' file path
                 let urlAux = new URL(url);
                 let robotsFilePath = urlAux.protocol + "//" + urlAux.host + urlAux.pathname + "robots.txt";
-
-                // defines the callback functions
-                let successCallback = function () {
-                    console.log(sitemapArray.length > 0 ? "-Sitemaps found in robot.xml: " + sitemapArray : "-Sitemaps not found in robots.txt");
-                    resolve(sitemapArray);
-                }
-                let errorCallback = function (e) {
-                    console.log("Error: " + e);
-                    resolve(sitemapArray);
-                }
 
                 // checks if robots.txt file exists
                 urlExist(robotsFilePath).then(exists => {
@@ -150,13 +160,13 @@ class WebscraperController {
                             }
                             successCallback();
                         }).catch(e => {
-                            errorCallback(e);
+                            successCallback();
                         })
                     } else {
                         // robots.txt file not found - in this case, continues the process to find the sitemaps in other places
                         successCallback();
                     }
-                }).catch(e => console.log("An error has occurred: " + e));
+                });
             } catch (e) {
                 errorCallback(e);
             }
@@ -169,16 +179,11 @@ class WebscraperController {
      * @returns 
      */
     retrieveSelectorSitemapXmlLink(sitemapArray) {
-        return {
-            "id": "sitemap",
-            "type": "SelectorSitemapXmlLink",
-            "parentSelectors": [
-                "_root"
-            ],
-            "sitemapXmlMinimumPriority": 0.1,
-            "sitemapXmlUrlRegex": "",
-            "sitemapXmlUrls": sitemapArray
-        };
+        let initialSelectorConfig = INITIAL_SELECTOR_SITEMAP_XML_LINK_CONFIG;
+
+        initialSelectorConfig.sitemapXmlUrls = sitemapArray;
+
+        return initialSelectorConfig;
     }
 
     /**
@@ -188,25 +193,20 @@ class WebscraperController {
      * @returns 
      */
     retrieveCustomSelectorText(selector, sitemapArray) {
-        return {
-            "id": "custom",
-            "type": "SelectorText",
-            "parentSelectors": [
-                sitemapArray && sitemapArray.length > 0 ? "sitemap" : "_root"
-            ],
-            "selector": selector && selector != "" ? selector : "h2",
-            "multiple": true,
-            "regex": "",
-            "delay": 0
-        };
+        let initialSelectorConfig = INITIAL_CUSTOM_SELECTOR_CONFIG;
+
+        initialSelectorConfig.parentSelectors = [sitemapArray && sitemapArray.length > 0 ? CUSTOM_SELECTOR_SITEMAP_SELECTORS : CUSTOM_SELECTOR_SINGLE_PAGE_SELECTORS];
+        initialSelectorConfig.selector = selector && selector != "" ? selector : CUSTOM_SELECTOR_DEFAULT_SELECTOR;
+
+        return initialSelectorConfig;
     }
 
     /**
-     * Retrieves the sitemaps from its default paths
+     * Retrieves the available sitemaps from its default paths
      * @param {string} urlToScrap 
      * @returns 
      */
-    retrieveSitemapsFromDefaultPaths(urlToScrap) {
+    retrieveAvailableSitemapsFromDefaultPaths(urlToScrap) {
         return new Promise((resolve, reject) => {
             let sitemapArray = [];
 
@@ -232,27 +232,27 @@ class WebscraperController {
         let defaultSitemapFilesLocation = [];
 
         try {
-            let url = new URL(urlToScrap);
-
-            let urlBegin = url.protocol + "//" + url.host + (url.pathname ? url.pathname : "/");
-
-            defaultSitemapFilesLocation = [
-                urlBegin + "sitemap.xml",
-                urlBegin + "sitemap.xml.gz",
-                urlBegin + "sitemap_index.xml",
-                urlBegin + "sitemap-index.xml",
-                urlBegin + "sitemap_index.xml.gz",
-                urlBegin + "sitemap-index.xml.gz",
-                urlBegin + ".sitemap.xml",
-                urlBegin + ".sitemap",
-                urlBegin + "admin/config/search/xmlsitemap",
-                urlBegin + "sitemap/sitemap-index.xml"
-            ];
+            let urlBegin = formatURLPath(urlToScrap);
+            retrieveDefaultSitemapFiles().forEach(defaultSitemapFile => {
+                defaultSitemapFilesLocation.push(urlBegin + defaultSitemapFile);
+            });
         } catch (error) {
             console.log("An exception has occurred: " + error);
         }
 
         return defaultSitemapFilesLocation;
+    }
+
+    /**
+     * Validates the request to create a sitemap
+     * @param {string} url 
+     * @param {string} selector 
+     * @param {string} webscraperToken 
+     */
+    validatesendCreateSitemapRequest(url, selector, webscraperToken) {
+        if (!url || !selector || !webscraperToken) {
+            throw new Error(INVALID_CREATE_SITEMAP_REQUEST_MESSAGE);
+        }
     }
 }
 

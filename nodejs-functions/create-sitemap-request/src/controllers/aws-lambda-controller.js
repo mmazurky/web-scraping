@@ -1,33 +1,30 @@
 import { WebscraperController } from './webscraper-controller.js';
-import { executeCallback } from "../utils/aws-lambda-utilities.js"
+import { retrieveLambdaSuccessResponse, retrieveLambdaErrorResponse } from "../utils/aws-lambda-utilities.js";
 
 class AwsLambdaController {
     /**
      * Handler method used by AWS Lambda
-     * @param {string} event 
+     * @param {object} event 
      * @param {*} context 
      */
-    handler(event, context, callback) {
-        console.log('Received event:', event);
-
+    async handler(event, context) {
         try {
             //instantiates the controller
             let webscraper = new WebscraperController();
 
             // deletes the scraping request)
-            webscraper.createSitemap(event.url, event.selector, event.webscraperToken).then(sitemapId => {
-                console.log("Finished with success!");
-                // returns the request status
-                executeCallback(null, callback, sitemapId);
+            let createSitemapResult = await webscraper.createSitemap(event.url, event.selector, event.webscraperToken).then(sitemapId => {
+                // returns the request response
+                return retrieveLambdaSuccessResponse(sitemapId);
             }).catch(error => {
-                console.log("An exception has occurred: " + error);
-                // returns the request status
-                executeCallback(error, callback, null);
+                // returns the request response
+                return retrieveLambdaErrorResponse(error);
             });
+
+            return createSitemapResult;
         } catch (error) {
-            console.log("An exception has occurred: " + error);
-            // returns the request status
-            executeCallback(error, callback, null);
+            // returns the request response
+            return retrieveLambdaErrorResponse(error);
         }
     };
 }
