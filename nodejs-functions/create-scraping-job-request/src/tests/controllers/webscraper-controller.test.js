@@ -55,7 +55,7 @@ describe("WebscraperController tests", () => {
             let httpSuccessResponseWithoutId = {
                 success: true,
                 data: {
-                    otherValue: randomString.generate()
+                    randomKey: randomString.generate()
                 }
             };
 
@@ -97,6 +97,26 @@ describe("WebscraperController tests", () => {
             return webscraperController.createScrapingJob(null, null).catch(error => {
                 expect(error.message).toBe(errorMessageResponse);
             })
+        })
+    })
+
+    describe("validateCreateScrapingJobRequest function tests | validates the request to create a sitemap", () => {
+        it("all mandatory fields not filled: must throw a 'invalid create sitemap request' error", () => {
+            let expectedError = new Error(INVALID_CREATE_SCRAPING_JOB_REQUEST_MESSAGE);
+
+            expect(() => webscraperController.validateCreateScrapingJobRequest(null, null)).toThrow(expectedError);
+        })
+
+        it("sitemapId field not filled: must throw a 'invalid create sitemap request' error", () => {
+            let expectedError = new Error(INVALID_CREATE_SCRAPING_JOB_REQUEST_MESSAGE);
+
+            expect(() => webscraperController.validateCreateScrapingJobRequest(null, "webscraperToken")).toThrow(expectedError);
+        })
+
+        it("webscraperToken field not filled: must throw a 'invalid create sitemap request' error", () => {
+            let expectedError = new Error(INVALID_CREATE_SCRAPING_JOB_REQUEST_MESSAGE);
+
+            expect(() => webscraperController.validateCreateScrapingJobRequest("sitemapId", null)).toThrow(expectedError);
         })
     })
 })

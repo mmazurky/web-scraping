@@ -14,14 +14,17 @@ class WebscraperController {
                 //validates the fields
                 this.validateCreateScrapingJobRequest(sitemapId, webscraperToken);
 
-                //sends the request
-                axios.post(WEBSCRAPER_HOST + CREATE_SCRAPING_JOB_PATH + "?api_token=" +  webscraperToken, {
+                //mounts the body
+                let body = {
                     "sitemap_id": sitemapId,
                     "driver": "fast", // "fast" or "fulljs"
                     "page_load_delay": 2000,
                     "request_interval": 2000,
                     "proxy": 0
-                }).then(res => {
+                };
+
+                //sends the request
+                axios.post(WEBSCRAPER_HOST + CREATE_SCRAPING_JOB_PATH + "?api_token=" +  webscraperToken, body).then(res => {
                     //if the scraping job id is present in the response, it was created with success
                     if (res && res.data && res.data.data && res.data.data.id) {
                         resolve(res.data.data.id);
