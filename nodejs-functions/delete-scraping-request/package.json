@@ -5,11 +5,20 @@
   "main": "src/app.js",
   "author": "Marcelo Mazurky",
   "license": "ISC",
+  "scripts": {
+    "test": "node --experimental-vm-modules node_modules/.bin/jest",
+    "test-coverage": "node --experimental-vm-modules node_modules/.bin/jest --coverage"
+  },
   "type": "module",
   "dependencies": {
     "axios": "^0.24.0",
-    "https": "^1.0.0",
     "path": "^0.12.7",
-    "properties-reader": "^2.2.0"
+    "properties-reader": "^2.2.0",
+    "randomstring": "^1.2.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.4.0",
+    "jest": "^27.4.7",
+    "nock": "^13.2.2"
   }
 }

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import * as WebscraperConstants from '../constants/webscraper-constants.js';
 
 class WebscraperController {
     /**
@@ -10,22 +11,29 @@ class WebscraperController {
      */
     deleteScraping(scrapingJobId, sitemapId, webscraperToken) {
         return new Promise((resolve, reject) => {
-            //default scraping job delete's path
-            let scrapingJobDeletePath = "https://api.webscraper.io/api/v1/scraping-job/" + scrapingJobId + "?api_token=" + webscraperToken;
-            //default sitemap delete's path
-            let sitemapDeletePath = "https://api.webscraper.io/api/v1/sitemap/" + sitemapId + "?api_token=" + webscraperToken;
-
-            // deletes the scraping job
-            return this.callDeleteAPI(scrapingJobDeletePath).then(function () {
-                // deletes the sitemap
-                this.callDeleteAPI(sitemapDeletePath).then(() => {
-                    resolve(true);
+            try {
+                //validates the fields
+                this.validateDeleteScrapingRequest(scrapingJobId, sitemapId, webscraperToken);
+    
+                //default scraping job delete's path
+                let scrapingJobDeletePath = WebscraperConstants.WEBSCRAPER_HOST + WebscraperConstants.DELETE_SCRAPING_JOB_PATH + "/" + scrapingJobId + "?api_token=" + webscraperToken;
+                //default sitemap delete's path
+                let sitemapDeletePath = WebscraperConstants.WEBSCRAPER_HOST + WebscraperConstants.DELETE_SITEMAP_PATH + "/" + sitemapId + "?api_token=" + webscraperToken;
+    
+                // deletes the scraping job
+                this.callDeleteAPI(scrapingJobDeletePath).then(() => {
+                    // deletes the sitemap
+                    this.callDeleteAPI(sitemapDeletePath).then(() => {
+                        resolve(true);
+                    }).catch(function (e) {
+                        reject(e);
+                    });
                 }).catch(function (e) {
                     reject(e);
                 });
-            }).catch(function (e) {
-                reject(e);
-            });
+            } catch (e) {
+                reject(e);                
+            }
         });
     };
 
@@ -38,19 +46,30 @@ class WebscraperController {
         // sends the delete request via webscrapper API
         return new Promise((resolve, reject) => {
             axios.delete(url).then(res => {
-                let result = JSON.parse(res.data);
-
-                if (result.success) {
-                    resolve(res);
+                if (res.data.success) {
+                    resolve(res.data.success);
                 } else {
-                    console.log("Got error in " + url, res);
-                    reject(res);
+                    reject(res.data);
                 }
             }).catch(e => {
-                console.log("Got error in " + url, e);
-                reject(e);
+                //status code different than 200
+                reject(e.response.data);
             })
         });
+    }
+
+    /**
+     * Validates the request to delete a scraping
+     * @param {number} scrapingJobId 
+     * @param {number} sitemapId 
+     * @param {string} webscraperToken 
+     */
+    validateDeleteScrapingRequest(scrapingJobId, sitemapId, webscraperToken) {
+        if (!scrapingJobId || !sitemapId || !webscraperToken) {
+            throw new Error(WebscraperConstants.INVALID_DELETE_SCRAPING_REQUEST_MESSAGE);
+        }
+
+        return true;
     }
 }
 
