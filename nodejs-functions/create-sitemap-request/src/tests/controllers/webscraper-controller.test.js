@@ -26,16 +26,14 @@ describe("WebscraperController tests", () => {
 
             // mocks a http response from robots.txt with sitemaps
             TestUtilities.mockRobotsWithSitemapsHttpResponse(nock, TestConstants.VALID_URL);
-
-            // mocks a expected http success response
+         
+            // mocks the http response when the API is called
             let httpSuccessResponse = {
                 success: true,
                 data: {
                     id: resultSitemapId
                 }
             };
-
-            // mocks the http response when the API is called
             TestUtilities.mockHttpPostSuccessResponse(nock, WebscraperConstants.WEBSCRAPER_HOST, TestUtilities.retrieveCreateSitemapWithTokenPath(), httpSuccessResponse);
 
             // sends the request
@@ -47,16 +45,14 @@ describe("WebscraperController tests", () => {
         it("valid API status, but no sitemap id returned: must reject and return the response", () => {
             // mocks a http response from robots.txt with sitemaps
             TestUtilities.mockRobotsWithSitemapsHttpResponse(nock, TestConstants.VALID_URL);
-
-            // mocks a expected http success response
+           
+            // mocks the http response when the API is called
             let httpSuccessResponseWithoutId = {
                 success: true,
                 data: {
                     randomKey: randomString.generate()
                 }
             };
-
-            // mocks the http response when the API is called
             TestUtilities.mockHttpPostSuccessResponse(nock, WebscraperConstants.WEBSCRAPER_HOST, TestUtilities.retrieveCreateSitemapWithTokenPath(), httpSuccessResponseWithoutId);
 
             // sends the request
@@ -68,13 +64,11 @@ describe("WebscraperController tests", () => {
         it("invalid API status creating a sitemap: must reject and return the response", () => {
             // mocks a http response from robots.txt with sitemaps
             TestUtilities.mockRobotsWithSitemapsHttpResponse(nock, TestConstants.VALID_URL);
-
-            // mocks a expected http error response
+           
+            // mocks the http response when the API is called
             let httpErrorResponse = {
                 success: false
             };
-
-            // mocks the http response when the API is called
             TestUtilities.mockHttpPostSuccessResponse(nock, WebscraperConstants.WEBSCRAPER_HOST, TestUtilities.retrieveCreateSitemapWithTokenPath(), httpErrorResponse);
 
             // sends the request
@@ -172,16 +166,14 @@ describe("WebscraperController tests", () => {
 
             // generates a random sitemap id
             let resultSitemapId = Math.random();
-
-            // mocks a expected http success response
+           
+            // mocks the http response when the API is called
             let httpSuccessResponse = {
                 success: true,
                 data: {
                     id: resultSitemapId
                 }
             };
-
-            // mocks the http response when the API is called
             TestUtilities.mockHttpPostSuccessResponse(nock, WebscraperConstants.WEBSCRAPER_HOST, TestUtilities.retrieveCreateSitemapWithTokenPath(), httpSuccessResponse);
 
             // sends the request
@@ -193,13 +185,11 @@ describe("WebscraperController tests", () => {
         it("invalid API status creating a sitemap: must reject and return the response", () => {
             // sitemap files
             let sitemapArray = [TestConstants.VALID_URL + "sitemap.xml", TestConstants.VALID_URL + "sitemap_index.xml"];
-
-            // mocks a expected http error response
+            
+            // mocks the http error response when the API is called
             let httpErrorResponse = {
                 success: false
             };
-
-            // mocks the http error response when the API is called
             TestUtilities.mockHttpPostErrorResponse(nock, WebscraperConstants.WEBSCRAPER_HOST, TestUtilities.retrieveCreateSitemapWithTokenPath(), httpErrorResponse);
 
             //sends the request
@@ -211,16 +201,14 @@ describe("WebscraperController tests", () => {
         it("valid API status, but no sitemap id returned: must reject and return the response", () => {
             // sitemap files
             let sitemapArray = [TestConstants.VALID_URL + "sitemap.xml", TestConstants.VALID_URL + "sitemap_index.xml"];
-
-            // mocks a expected success http response without the sitemap id
+          
+            // mocks the http response when the API is called
             let httpSuccessResponseWithoutId = {
                 success: true,
                 data: {
                     otherValue: randomString.generate()
                 }
             };
-
-            // mocks the http response when the API is called
             TestUtilities.mockHttpPostErrorResponse(nock, WebscraperConstants.WEBSCRAPER_HOST, TestUtilities.retrieveCreateSitemapWithTokenPath(), httpSuccessResponseWithoutId);
 
             //sends the request
@@ -487,28 +475,34 @@ describe("WebscraperController tests", () => {
     })
 
     describe("validateCreateSitemapRequest function tests | validates the request to create a sitemap", () => {
+        it("all mandatory fields filled: must return true", () => {
+            let result = webscraperController.validateSendCreateSitemapRequest(TestConstants.VALID_URL, TestConstants.VALID_ELEMENT_SELECTOR, TestConstants.RANDOM_WEBSCRAPER_TOKEN);
+
+            expect(result).toBe(true);
+        })
+
         it("all mandatory fields not filled: throws an 'invalid create sitemap request' error", () => {
             let expectedError = new Error(WebscraperConstants.INVALID_CREATE_SITEMAP_REQUEST_MESSAGE);
 
-            expect(() => webscraperController.validatesendCreateSitemapRequest(null, null, null)).toThrow(expectedError);
+            expect(() => webscraperController.validateSendCreateSitemapRequest(null, null, null)).toThrow(expectedError);
         })
 
         it("url field not filled: throws an 'invalid create sitemap request' error", () => {
             let expectedError = new Error(WebscraperConstants.INVALID_CREATE_SITEMAP_REQUEST_MESSAGE);
 
-            expect(() => webscraperController.validatesendCreateSitemapRequest(null, TestConstants.VALID_ELEMENT_SELECTOR, TestConstants.RANDOM_WEBSCRAPER_TOKEN)).toThrow(expectedError);
+            expect(() => webscraperController.validateSendCreateSitemapRequest(null, TestConstants.VALID_ELEMENT_SELECTOR, TestConstants.RANDOM_WEBSCRAPER_TOKEN)).toThrow(expectedError);
         })
 
         it("selector field not filled: throws an 'invalid create sitemap request' error", () => {
             let expectedError = new Error(WebscraperConstants.INVALID_CREATE_SITEMAP_REQUEST_MESSAGE);
 
-            expect(() => webscraperController.validatesendCreateSitemapRequest(TestConstants.VALID_URL, null, TestConstants.RANDOM_WEBSCRAPER_TOKEN)).toThrow(expectedError);
+            expect(() => webscraperController.validateSendCreateSitemapRequest(TestConstants.VALID_URL, null, TestConstants.RANDOM_WEBSCRAPER_TOKEN)).toThrow(expectedError);
         })
 
         it("webscraperToken field not filled: throws an 'invalid create sitemap request' error", () => {
             let expectedError = new Error(WebscraperConstants.INVALID_CREATE_SITEMAP_REQUEST_MESSAGE);
 
-            expect(() => webscraperController.validatesendCreateSitemapRequest(TestConstants.VALID_URL, TestConstants.VALID_ELEMENT_SELECTOR, null)).toThrow(expectedError);
+            expect(() => webscraperController.validateSendCreateSitemapRequest(TestConstants.VALID_URL, TestConstants.VALID_ELEMENT_SELECTOR, null)).toThrow(expectedError);
         })
     })
 })

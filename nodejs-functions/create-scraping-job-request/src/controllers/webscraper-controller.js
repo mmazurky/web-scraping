@@ -50,6 +50,8 @@ class WebscraperController {
         if (!sitemapId || !webscraperToken) {
             throw new Error(WebscraperConstants.INVALID_CREATE_SCRAPING_JOB_REQUEST_MESSAGE);
         }
+
+        return true;
     }
 }
 

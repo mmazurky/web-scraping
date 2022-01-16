@@ -16,7 +16,7 @@ class WebscraperController {
         return new Promise((resolve, reject) => {
             try {
                 //validates the fields
-                this.validatesendCreateSitemapRequest(url, selector, webscraperToken);
+                this.validateSendCreateSitemapRequest(url, selector, webscraperToken);
 
                 //gets the sitemaps from the requested page
                 this.getSitemaps(url).then(sitemapArray => {
@@ -239,10 +239,12 @@ class WebscraperController {
      * @param {string} selector 
      * @param {string} webscraperToken 
      */
-    validatesendCreateSitemapRequest(url, selector, webscraperToken) {
+    validateSendCreateSitemapRequest(url, selector, webscraperToken) {
         if (!url || !selector || !webscraperToken) {
             throw new Error(WebscraperConstants.INVALID_CREATE_SITEMAP_REQUEST_MESSAGE);
         }
+
+        return true;
     }
 }
 

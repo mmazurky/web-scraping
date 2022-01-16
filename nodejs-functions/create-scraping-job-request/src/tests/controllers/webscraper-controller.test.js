@@ -1,18 +1,17 @@
 import { WebscraperController } from "../../controllers/webscraper-controller.js";
+import { TestUtilities} from "../../utils/test-utilities.js"
 import * as WebscraperConstants from '../../constants/webscraper-constants.js';
+import * as TestConstants from '../../constants/test-constants.js';
 import nock from 'nock';
 import randomString from 'randomstring';
 
 describe("WebscraperController tests", () => {
     let webscraperController;
-    let webscraperToken;
     let createScrapingJobUrlPath;
 
     beforeAll(() => {
-        // generates a random token
-        webscraperToken = randomString.generate();
         // mounts the create scraping job's url path
-        createScrapingJobUrlPath = WebscraperConstants.CREATE_SCRAPING_JOB_PATH + "?api_token=" + webscraperToken
+        createScrapingJobUrlPath = TestUtilities.retrieveCreateScrapingJobWithTokenPath();
     })
 
     beforeEach(() => {
@@ -27,8 +26,8 @@ describe("WebscraperController tests", () => {
         })
 
         it("valid response creating a scraping job: must resolve and return the scraping job id", () => {
-            // generates a random scraping job id
-            let resultScrapingJobId = Math.random();
+            // random scraping job id
+            let resultScrapingJobId = TestConstants.RANDOM_SCRAPING_JOB_ID;
 
             // mocks a expected http success response
             let httpSuccessResponse = {
@@ -37,15 +36,10 @@ describe("WebscraperController tests", () => {
                     id: resultScrapingJobId
                 }
             };
-
-            // mocks the http response when the API is called
-            nock(WebscraperConstants.WEBSCRAPER_HOST)
-                .persist()
-                .post(createScrapingJobUrlPath)
-                .reply(200, httpSuccessResponse);
+            TestUtilities.mockHttpPostSuccessResponse(nock, WebscraperConstants.WEBSCRAPER_HOST, createScrapingJobUrlPath, httpSuccessResponse);
 
             // sends the request
-            return webscraperController.createScrapingJob(Math.random(), webscraperToken).then(result => {
+            return webscraperController.createScrapingJob(TestConstants.RANDOM_SITEMAP_ID, TestConstants.RANDOM_WEBSCRAPER_TOKEN).then(result => {
                 expect(result).toBe(resultScrapingJobId);
             });
         });
@@ -58,33 +52,24 @@ describe("WebscraperController tests", () => {
                     randomKey: randomString.generate()
                 }
             };
-
-            // mocks the http response when the API is called
-            nock(WebscraperConstants.WEBSCRAPER_HOST)
-                .persist()
-                .post(createScrapingJobUrlPath)
-                .reply(200, httpSuccessResponseWithoutId);
+            TestUtilities.mockHttpPostSuccessResponse(nock, WebscraperConstants.WEBSCRAPER_HOST, createScrapingJobUrlPath, httpSuccessResponseWithoutId);
+            
 
             //sends the request
-            return webscraperController.createScrapingJob(Math.random(), webscraperToken).catch(error => {
+            return webscraperController.createScrapingJob(TestConstants.RANDOM_SITEMAP_ID, TestConstants.RANDOM_WEBSCRAPER_TOKEN).catch(error => {
                 expect(error).toEqual(httpSuccessResponseWithoutId);
             });
         });
 
         it("invalid API status creating a scraping job: must reject and return the response", () => {
-            // mocks a expected http error response
+            // mocks the http error response when the API is called
             let httpErrorResponse = {
                 success: false
-            };
-
-            // mocks the http error response when the API is called
-            nock(WebscraperConstants.WEBSCRAPER_HOST)
-                .persist()
-                .post(createScrapingJobUrlPath)
-                .reply(400, httpErrorResponse);
+            };          
+            TestUtilities.mockHttpPostErrorResponse(nock, WebscraperConstants.WEBSCRAPER_HOST, createScrapingJobUrlPath, httpErrorResponse);
 
             //sends the request
-            return webscraperController.createScrapingJob(Math.random(), webscraperToken).catch(error => {
+            return webscraperController.createScrapingJob(TestConstants.RANDOM_SITEMAP_ID, TestConstants.RANDOM_WEBSCRAPER_TOKEN).catch(error => {
                 expect(error).toEqual(httpErrorResponse);
             });
         });
@@ -101,6 +86,12 @@ describe("WebscraperController tests", () => {
     })
 
     describe("validateCreateScrapingJobRequest function tests | validates the request to create a sitemap", () => {
+        it("all mandatory fields filled: must return true", () => {
+            let result = webscraperController.validateCreateScrapingJobRequest(TestConstants.RANDOM_SITEMAP_ID, TestConstants.RANDOM_WEBSCRAPER_TOKEN);
+
+            expect(result).toBe(true);
+        })
+
         it("all mandatory fields not filled: must throw a 'invalid create sitemap request' error", () => {
             let expectedError = new Error(WebscraperConstants.INVALID_CREATE_SCRAPING_JOB_REQUEST_MESSAGE);
 
@@ -110,13 +101,13 @@ describe("WebscraperController tests", () => {
         it("sitemapId field not filled: must throw a 'invalid create sitemap request' error", () => {
             let expectedError = new Error(WebscraperConstants.INVALID_CREATE_SCRAPING_JOB_REQUEST_MESSAGE);
 
-            expect(() => webscraperController.validateCreateScrapingJobRequest(null, "webscraperToken")).toThrow(expectedError);
+            expect(() => webscraperController.validateCreateScrapingJobRequest(null, TestConstants.RANDOM_WEBSCRAPER_TOKEN)).toThrow(expectedError);
         })
 
         it("webscraperToken field not filled: must throw a 'invalid create sitemap request' error", () => {
             let expectedError = new Error(WebscraperConstants.INVALID_CREATE_SCRAPING_JOB_REQUEST_MESSAGE);
 
-            expect(() => webscraperController.validateCreateScrapingJobRequest("sitemapId", null)).toThrow(expectedError);
+            expect(() => webscraperController.validateCreateScrapingJobRequest(TestConstants.RANDOM_SITEMAP_ID, null)).toThrow(expectedError);
         })
     })
 })
