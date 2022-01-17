@@ -7,49 +7,35 @@ class PropertiesUtilities {
      * @param {string} property 
      * @returns 
      */
-    static getEnvProperty(property) {
-        try {
-            let properties = PropertiesReader(Path.resolve('.env'));
+     static getEnvProperty(property) {
+        let processVariable = process.env[property] ? process.env[property] : "";
 
-            return properties.get(property) != null ? properties.get(property) : process.env[property] ? process.env[property] : "";
-        } catch (e) {
-            console.log("An error has occurred: " + e);
-            return "";
+        if (processVariable === "") {
+            let properties = PropertiesReader(Path.resolve('.env'));
+            processVariable = properties.get(property) !== null ? properties.get(property) : "";
         }
+
+        return processVariable;
     }
 
     /**
      * Defines a value for a property in env file
-     * @param {string} filename 
      * @param {string} propertyName 
      * @param {*} propertyValue 
      * @returns 
      */
-    static setEnvProperty(propertyName, propertyValue) {
-        return new Promise((resolve, reject) => {
-            try {
-                let propertiesPath = Path.resolve('.env');
-                //sets the property value
-                let properties = PropertiesReader(propertiesPath, {
-                    writer: {
-                        saveSections: true
-                    }
-                });
-                properties.set(propertyName, propertyValue);
-
-                //saves the property value
-                properties.save(propertiesPath, (err, data) => {
-                    if (err) {
-                        reject(error);
-                    } else {
-                        resolve(true);
-                    }
-                });
-            } catch (error) {
-                console.log("error: " + error);
-                reject(error);
+    static async setEnvProperty(propertyName, propertyValue) {
+        let propertiesPath = Path.resolve('.env');
+        //sets the property value
+        let properties = PropertiesReader(propertiesPath, {
+            writer: {
+                saveSections: true
             }
         });
+        properties.set(propertyName, propertyValue);
+
+        //saves the property value
+        await properties.save(propertiesPath);
     }
 }
 

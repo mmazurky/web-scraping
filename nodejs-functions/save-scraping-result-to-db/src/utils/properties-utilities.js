@@ -16,7 +16,6 @@ class PropertiesUtilities {
         }
 
         return processVariable;
-
     }
 
     /**
