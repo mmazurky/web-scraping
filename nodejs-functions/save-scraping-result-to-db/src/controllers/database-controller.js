@@ -1,42 +1,32 @@
-import { retrieveDatabaseConfig } from "../utils/database-utilities.js"
+import { DatabaseConfig } from "../configs/database-config.js";
+import { retrieveScrapingDBTable, retrieveScrapingDBColumn
+} from "../utils/database-utilities.js"
 
 class DatabaseController {
     constructor() {
-        // retrieves the database config
-        this.databaseConfig = retrieveDatabaseConfig();
-
-        // starts the db library 
-        this.knex = require('knex')({
-            client: this.databaseConfig.client,
-            connection: {
-                database: this.databaseConfig.name,
-                port: this.databaseConfig.port,
-                host: this.databaseConfig.host,
-                user: this.databaseConfig.user,
-                password: this.databaseConfig.password
-            }
-        });
+        this.dbClient = DatabaseConfig.getInstance().getDBClient();
     }
 
     /**
      * Saves the Scraping Data to Database
      * @param {string} scrapingData
+     * @param {knex} dbClient
      * @returns 
      */
     saveScrapingResultToDB(scrapingData) {
         return new Promise((resolve, reject) => {
             try {
-                // uses the column 'scraping_data' to store the result
+                let scrapingTable = retrieveScrapingDBTable();
+                let scrapingColumn = retrieveScrapingDBColumn();
+
                 let scrapingResult = [{
-                    scraping_data: scrapingData
-                }]
+                    [scrapingColumn]: scrapingData
+                }];
 
                 // inserts the result in tb_scraping table
-                this.knex('tb_scraping').insert(scrapingResult).then(() => {
-                    this.knex.destroy();
+                this.dbClient(scrapingTable).insert(scrapingResult).then(result => {
                     resolve(true);
                 }).catch((error) => {
-                    this.knex.destroy();
                     reject(error);
                 })
             } catch (error) {

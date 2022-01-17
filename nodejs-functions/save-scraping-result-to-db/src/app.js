@@ -1,12 +1,23 @@
 import { AwsLambdaController } from './controllers/aws-lambda-controller.js';
 import { DatabaseController } from './controllers/database-controller.js';
 
+/**
+ * Handler for AWS Lambda
+ * @param {*} event 
+ * @param {*} context 
+ * @returns 
+ */
 function awsLambdaHandler(event, context) {
     return new AwsLambdaController().handler(event, context);
 }
 
-function saveScrapingResultToDB(scrapingData, dbHost, dbUser, dbPassword, dbName, dbClient) {
-    return new DatabaseController().saveScrapingResultToDB(scrapingData, dbHost, dbUser, dbPassword, dbName, dbClient);
+/**
+ * Saves a scraping result to DB
+ * @param {*} scrapingData 
+ * @returns 
+ */
+function saveScrapingResultToDB(scrapingData) {
+    return new DatabaseController().saveScrapingResultToDB(scrapingData);
 }
 
 export {
