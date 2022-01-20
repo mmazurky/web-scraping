@@ -1,50 +1,85 @@
-class AwsLambdaUtilities {
+import { AWSLambdaConfig } from "../configs/aws-lambda-config.js";
+
+class AWSLambdaUtilities {
     /**
-     * Gets the body's request in JSON format
-     * @param {*} event 
+     * Retrieves Lambda success response
      * @returns 
      */
-    static getBodyJson(event) {
-        try {
-            return event.body && event.body != null ? JSON.parse(event.body) : null;
-        } catch (e) {
-            console.log("Exception: " + e);
+    static retrieveLambdaSuccessResponse() {
+        return {
+            status: 200,
+            success: true
+        };
+    }
+
+    /**
+     * Retrieves Lambda error response
+     * @param {*} error 
+     * @returns 
+     */
+    static retrieveLambdaErrorResponse(error) {
+        return {
+            status: 400,
+            success: false,
+            reason: error && error.message ? error.message : typeof error === 'object' ? JSON.stringify(error) : error
+        };
+    }
+
+    /**
+     * Retrieves params to call a sync Lambda function
+     * @param {*} request 
+     * @returns 
+     */
+    static retrieveLambdaSyncParams(functionName, request) {
+        return {
+            FunctionName: functionName,
+            InvocationType: 'RequestResponse',
+            LogType: 'Tail',
+            Payload: JSON.stringify(request)
+        };
+    }
+
+    /**
+     * Calls another AWS Lambda sync function
+     * @param {string} functionName 
+     * @param {string} payload 
+     * @returns 
+     */
+    static callLambdaSyncFunction(functionName, request) {
+        // retrieves the params
+        let params = AWSLambdaUtilities.retrieveLambdaSyncParams(functionName, request);
+
+        let result = "";
+        //invokes the function
+        AWSLambdaConfig.getInstance().getAWSLambdaClient().invoke(params, function (err, data) {
+            let functionSuccess = data && data.Payload && data.Payload.success;
+
+            if (err || !functionSuccess) {
+                console.log("Error calling the Lambda Function " + functionName + ": ", err ? err : data);
+                throw AWSLambdaUtilities.formatAWSLambdaError(functionName, err ? err : data && data.Payload ? data.Payload : data);
+            } else {
+                result = data.Payload;
+            }
+        });
+
+        return result;
+    };
+
+    /**
+     * Format AWS Lambda error
+     * @param {string} functionName 
+     * @param {*} payload 
+     * @returns 
+     */
+    static formatAWSLambdaError(functionName, payload) {
+        let errorInfo = {
+            function_name: functionName,
+            payload: payload
         }
-    };
-
-    /**
-     * Gets the JSON Payload
-     * @param {*} data 
-     * @returns 
-     */
-    static getJsonPayload(data) {
-        let hasPayload = data && data.Payload;
-        return hasPayload ? JSON.parse(data.Payload) : null;
-    };
-
-    /**
-     * Executes the success callback
-     * @param {*} context 
-     */
-    static executeSuccessCallback(context) {
-        console.log("Finished with success!");
-        // response for AWS Lambda
-        context.succeed();
-    };
-
-    /**
-     * Executes the error callback
-     * @param {*} context 
-     * @param {error} error 
-     */
-    static executeErrorCallback(context, error) {
-        console.log("An exception has occurred: " + error);
-        // response for AWS Lambda
-        context.fail(error);
-    };
+        return new Error(JSON.stringify(errorInfo));
+    }
 }
 
-export const getBodyJson = AwsLambdaUtilities.getBodyJson;
-export const getJsonPayload = AwsLambdaUtilities.getJsonPayload;
-export const executeSuccessCallback = AwsLambdaUtilities.executeSuccessCallback;
-export const executeErrorCallback = AwsLambdaUtilities.executeErrorCallback;
+export {
+    AWSLambdaUtilities
+}

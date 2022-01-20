@@ -7,7 +7,9 @@
   "author": "Marcelo Mazurky",
   "license": "ISC",
   "scripts": {
-    "test-server": "node src/test-server.js"
+    "test-server": "node src/test-server.js",
+    "test": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/.bin/jest",
+    "test-coverage": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/.bin/jest --coverage"
   },
   "dependencies": {
     "aws-sdk": "^2.1048.0",
@@ -17,8 +19,15 @@
     "create-sitemap-request": "file:../create-sitemap-request",
     "cross-fetch": "^3.1.4",
     "express": "^4.17.2",
-    "jest": "^27.4.7",
     "path": "^0.12.7",
-    "properties-reader": "^2.2.0"
+    "properties-reader": "^2.2.0",
+    "randomstring": "^1.2.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.4.0",
+    "aws-sdk-mock": "^5.5.1",
+    "cross-env": "^7.0.3",
+    "jest": "^27.4.7",
+    "nock": "^13.2.2"
   }
 }

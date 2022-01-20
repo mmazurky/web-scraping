@@ -7,7 +7,7 @@ class PropertiesUtilities {
      * @param {string} property 
      * @returns 
      */
-     static getEnvProperty(property) {
+    static getEnvProperty(property) {
         let processVariable = process.env[property] ? process.env[property] : "";
 
         if (processVariable === "") {
@@ -37,6 +37,7 @@ class PropertiesUtilities {
         //saves the property value
         await properties.save(propertiesPath);
     }
+
 }
 
 export const getEnvProperty = PropertiesUtilities.getEnvProperty;
